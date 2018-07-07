@@ -7,7 +7,9 @@
     "url": "https://github.com/gatsbyjs/gatsby-starter-blog/issues"
   },
   "dependencies": {
+    "algoliasearch": "^3.29.0",
     "gatsby": "next",
+    "gatsby-plugin-algolia": "^0.0.4",
     "gatsby-plugin-feed": "next",
     "gatsby-plugin-google-analytics": "next",
     "gatsby-plugin-offline": "next",
