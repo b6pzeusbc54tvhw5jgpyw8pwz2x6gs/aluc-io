@@ -49,15 +49,17 @@ export const pageQuery = graphql`
         title
       }
     }
-    allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
+    allMarkdownRemark(
+      sort: { fields: [fields___prefix], order: DESC }
+    ) {
       edges {
         node {
           excerpt
           fields {
             slug
+            prefix
           }
           frontmatter {
-            date(formatString: "DD MMMM, YYYY")
             title
           }
         }

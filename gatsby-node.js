@@ -5,28 +5,30 @@ const { createFilePath } = require('gatsby-source-filesystem')
 
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
-
   return new Promise((resolve, reject) => {
     const blogPost = path.resolve('./src/templates/blog-post.js')
     resolve(
-      graphql(
-        `
-          {
-            allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }, limit: 1000) {
-              edges {
-                node {
-                  fields {
-                    slug
-                  }
-                  frontmatter {
-                    title
-                  }
-                }
+      graphql(`{
+        allMarkdownRemark(
+          filter: { fields: { slug: { regex: "//posts|pages//" }}},
+          sort: { fields: [fields___prefix], order: DESC },
+          limit: 1000
+        ) {
+          edges {
+            node {
+              id
+              fileAbsolutePath
+              fields {
+                slug
+                prefix
+              }
+              frontmatter {
+                title
               }
             }
           }
-        `
-      ).then(result => {
+        }
+      }`).then(result => {
         if (result.errors) {
           console.log(result.errors)
           reject(result.errors)
@@ -59,8 +61,13 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 
   if (node.internal.type === `MarkdownRemark`) {
     const contentsPath = path.resolve('./contents')
-    let value = path.relative(contentsPath, node.fileAbsolutePath)
-    value = `/` + path.dirname(value)
-    createNodeField({ name: `slug`, node, value })
+    const value = path.relative(contentsPath, node.fileAbsolutePath)
+    const slug = `/` + path.dirname(value)
+    createNodeField({ node, name: `slug`, value: slug })
+    console.log(slug)
+
+    const prefix = path.basename(slug).split('--')[0]
+    console.log(prefix)
+    createNodeField({ node, name: `prefix`, value: prefix })
   }
 }

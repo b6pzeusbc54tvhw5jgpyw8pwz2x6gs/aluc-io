@@ -79,9 +79,12 @@ export const pageQuery = graphql`
     markdownRemark(fields: { slug: { eq: $slug } }) {
       id
       html
+      fields {
+        slug
+        prefix
+      }
       frontmatter {
         title
-        date(formatString: "MMMM DD, YYYY")
       }
     }
   }
