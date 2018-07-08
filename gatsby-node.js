@@ -61,8 +61,11 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 
   if (node.internal.type === `MarkdownRemark`) {
     const contentsPath = path.resolve('./contents')
-    const value = path.relative(contentsPath, node.fileAbsolutePath)
-    const slug = `/` + path.dirname(value)
+
+    const fileRelativePath = path.relative(contentsPath, node.fileAbsolutePath)
+    createNodeField({ node, name: `fileRelativePath`, value: fileRelativePath })
+
+    const slug = `/` + path.dirname(fileRelativePath)
     createNodeField({ node, name: `slug`, value: slug })
     console.log(slug)
 
@@ -70,4 +73,32 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
     console.log(prefix)
     createNodeField({ node, name: `prefix`, value: prefix })
   }
+}
+
+exports.onCreateWebpackConfig = ({ stage, actions }) => {
+  actions.setWebpackConfig({
+    module: {
+      rules: [
+        {
+          test: /\.ya?ml$/,
+          include: path.resolve("data"),
+          use: {
+            loader: 'yaml-loader',
+          }
+        }
+      ]
+    }
+  })
+}
+
+exports.onCreateBabelConfig = ({ actions }) => {
+  actions.setBabelPlugin({
+    name: "styled-jsx/babel",
+    options: {
+      plugins: [
+        "styled-jsx-plugin-postcss",
+        ["styled-jsx-plugin-stylelint", { stylelint: require('./stylelint.config') }],
+      ],
+    }
+  })
 }

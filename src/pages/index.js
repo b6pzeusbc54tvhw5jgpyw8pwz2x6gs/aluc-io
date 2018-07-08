@@ -10,8 +10,8 @@ import { rhythm } from '../utils/typography'
 
 class BlogIndex extends React.Component {
   render() {
-    const siteTitle = get(this, 'props.data.site.siteMetadata.title')
-    const posts = get(this, 'props.data.allMarkdownRemark.edges')
+    const siteTitle = get(this.props, 'data.site.siteMetadata.title')
+    const posts = get(this.props, 'data.allMarkdownRemark.edges')
 
     return (
       <Layout location={this.props.location}>
@@ -43,13 +43,14 @@ class BlogIndex extends React.Component {
 export default BlogIndex
 
 export const pageQuery = graphql`
-  query IndexQuery {
+  query LayoutQuery {
     site {
       siteMetadata {
         title
       }
     }
     allMarkdownRemark(
+      filter: { fields: { fileRelativePath: { regex: "/posts/.+?/index\\.md/" }}}
       sort: { fields: [fields___prefix], order: DESC }
     ) {
       edges {
@@ -61,6 +62,8 @@ export const pageQuery = graphql`
           }
           frontmatter {
             title
+            subTitle
+            category
           }
         }
       }
