@@ -1,8 +1,8 @@
 module.exports = {
   rules: {
     "shorthand-property-no-redundant-values": null,
-    "block-no-empty": null,
 
+    "block-no-empty": true,
     "color-no-invalid-hex": true,
     "unit-no-unknown": true,
     "property-no-unknown": true,
