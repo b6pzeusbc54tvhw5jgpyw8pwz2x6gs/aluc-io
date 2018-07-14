@@ -83,6 +83,9 @@ const layoutReducer = (state=initialLayout ,action) => {
   }
 }
 
+export function setShowLayout(val) {
+  return { type: SET_SHOW_LAYOUT, val }
+}
 
 const initialState = {
   navigatorPosition: "is-aside",
@@ -94,11 +97,11 @@ const initialState = {
 }
 
 const createStore = () => {
-  const reducer = combineReducers({
+  const cReducer = combineReducers({
     layout: layoutReducer,
   })
 
-  return reduxCreateStore(reducer, void 0, composeWithDevTools(applyMiddleware()))
+  return reduxCreateStore(cReducer, void 0, composeWithDevTools(applyMiddleware()))
 }
 
 export default createStore

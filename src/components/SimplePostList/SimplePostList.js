@@ -8,13 +8,11 @@ import { isWideScreenSelector } from '_src/selectors/layout'
 import { setNavigatorPosition, setNavigatorShape, setCategoryFilter } from "../../store"
 import List from "./List"
 import theme from "../../theme/theme.yaml"
-
-const SHOW_LAYOUT = true
-
 class SimplePostList extends React.Component {
 
   render() {
     const { posts, navigatorPosition, navigatorShape, categoryFilter } = this.props
+    const { showLayout } = this.props
 
     return (
       <div className='box'>
@@ -31,14 +29,8 @@ class SimplePostList extends React.Component {
         <style jsx>{`
           .box {
             transform: translate3d(0, 0, 0);
-/*             will-change: left, top, bottom, width; */
-/*             position: absolute; */
-/*             top: 0, */
-/*             left: 0, */
-/*             transition-timing-function: "ease", */
-/*             transition: "left .9s", */
             width: 640px;
-            background-color: ${SHOW_LAYOUT ? "rgba(0, 21, 128, 0.17)" : theme.navigator.colors.background};
+            background-color: ${showLayout ? "rgba(0, 21, 128, 0.17)" : theme.navigator.colors.background};
             margin: 10px auto 0 auto;
           }
           .seeMore {
@@ -71,6 +63,7 @@ class SimplePostList extends React.Component {
 
 SimplePostList.propTypes = {
   posts: PropTypes.array.isRequired,
+  showLayout: PropTypes.bool.isRequired,
   //navigatorPosition: PropTypes.string.isRequired,
   //navigatorShape: PropTypes.string.isRequired,
   //setNavigatorPosition: PropTypes.func.isRequired,
@@ -84,13 +77,14 @@ const mapStateToProps = (state, ownProps) => ({
   isWideScreen: isWideScreenSelector(state),
   navigatorPosition: state.navigatorPosition,
   navigatorShape: state.navigatorShape,
-  categoryFilter: state.categoryFilter
+  categoryFilter: state.categoryFilter,
+  showLayout: state.layout.showLayout,
 })
 
 const mapDispatchToProps = {
   setNavigatorPosition,
   setNavigatorShape,
-  setCategoryFilter
+  setCategoryFilter,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SimplePostList)
