@@ -1,11 +1,12 @@
+import { Link } from 'gatsby'
 import { connect } from "react-redux"
 import { withRouter } from 'react-router-dom'
 import DeveloperBoard from 'react-icons/lib/md/developer-board'
 import PropTypes from "prop-types"
 import React from "react"
 import Search from 'react-icons/lib/fa/search'
-import cx from 'classnames'
 
+import cx from 'classnames'
 import { setShowLayout } from '_src/store'
 import theme from '_src/theme/theme.yaml'
 
@@ -22,9 +23,11 @@ const ToolBox = (props) => {
           onClick={() => props.setShowLayout(!showLayout)}
         />
       </div>
-      <div className='iconBox'>
-        <Search className='icon' />
-      </div>
+      <Link to='/search'>
+        <div className='iconBox'>
+          <Search className='icon' />
+        </div>
+      </Link>
       <style jsx>{`
         .box {
           position: fixed;
