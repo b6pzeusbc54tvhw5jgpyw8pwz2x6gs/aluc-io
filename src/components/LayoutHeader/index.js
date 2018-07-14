@@ -2,6 +2,7 @@ import React from "react"
 import PropTypes from "prop-types"
 import Avatar from "@material-ui/core/Avatar"
 import { connect } from "react-redux"
+import { withRouter } from "react-router"
 import { Link } from "gatsby"
 
 import theme from "../../theme/theme.yaml"
@@ -11,7 +12,11 @@ import { isWideScreenSelector } from '_src/selectors/layout'
 
 const SHOW_LAYOUT = true
 
-const LayoutHeader = ({ config }) => {
+const LayoutHeader = props => {
+  const { config, location } = props
+  console.log( props )
+
+
   return (
     <div className='box'>
       <div className='avatarBox'>
@@ -90,13 +95,17 @@ const LayoutHeader = ({ config }) => {
 
 LayoutHeader.propTypes = {
   config: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
   isWideScreen: isWideScreenSelector(state),
-  navigatorPosition: state.navigatorPosition,
-  navigatorShape: state.navigatorShape,
-  categoryFilter: state.categoryFilter
+  showLayout: state.layout.showLayout,
+  //navigatorPosition: state.navigatorPosition,
+  //navigatorShape: state.navigatorShape,
+  //categoryFilter: state.categoryFilter,
 })
 
-export default connect(mapStateToProps)(LayoutHeader)
+export default withRouter(connect(mapStateToProps)(LayoutHeader))

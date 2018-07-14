@@ -5,11 +5,12 @@ import { graphql } from "gatsby"
 require("core-js/fn/array/find")
 require("prismjs/themes/prism-okaidia.css")
 
-import { setNavigatorPosition, setNavigatorShape } from "_src/store"
+//import { setNavigatorPosition, setNavigatorShape } from "_src/store"
 import Post from "_src/components/Post/"
 import Footer from "_src/components/Footer/"
 import Seo from "_src/components/Seo"
 import Article from "_src/components/Main/Article"
+
 import theme from "_src/theme/theme.yaml"
 import config from "_config/meta"
 import Layout from '../components/layout'
@@ -44,19 +45,22 @@ class PostTemplate extends React.Component {
 PostTemplate.propTypes = {
   data: PropTypes.object.isRequired,
   pathContext: PropTypes.object.isRequired,
-  navigatorPosition: PropTypes.string.isRequired,
-  setNavigatorPosition: PropTypes.func.isRequired,
+  //navigatorPosition: PropTypes.string.isRequired,
+  //setNavigatorPosition: PropTypes.func.isRequired,
+  match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    navigatorPosition: state.navigatorPosition,
+    //navigatorPosition: state.navigatorPosition,
   }
 }
 
 const mapDispatchToProps = {
-  setNavigatorPosition,
-  setNavigatorShape
+  //setNavigatorPosition,
+  //setNavigatorShape
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PostTemplate)

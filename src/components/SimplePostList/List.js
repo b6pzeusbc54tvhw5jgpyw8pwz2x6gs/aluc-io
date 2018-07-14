@@ -15,10 +15,7 @@ class List extends React.Component {
     const {
       posts,
       linkOnClick,
-      expandOnClick,
       categoryFilter,
-      navigatorShape,
-      removeFilter
     } = this.props;
 
     return (
@@ -56,11 +53,7 @@ class List extends React.Component {
 List.propTypes = {
   posts: PropTypes.array.isRequired,
   linkOnClick: PropTypes.func.isRequired,
-  expandOnClick: PropTypes.func.isRequired,
-  navigatorPosition: PropTypes.string.isRequired,
-  navigatorShape: PropTypes.string.isRequired,
-  categoryFilter: PropTypes.string.isRequired,
-  removeFilter: PropTypes.func.isRequired
+  //categoryFilter: PropTypes.string.isRequired,
 };
 
 export default List

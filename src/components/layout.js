@@ -44,7 +44,10 @@ class Layout extends React.Component {
 }
 
 Layout.propTypes = {
-  children: PropTypes.func.isRequired,
+  children: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.array,
+  ]).isRequired,
   setWindowSize: PropTypes.func.isRequired,
   //fontSizeIncrease: PropTypes.number.isRequired,
   //setFontSizeIncrease: PropTypes.func.isRequired,

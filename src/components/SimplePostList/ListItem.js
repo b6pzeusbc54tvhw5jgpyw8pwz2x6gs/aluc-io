@@ -100,7 +100,7 @@ class ListItem extends React.Component {
 ListItem.propTypes = {
   post: PropTypes.object.isRequired,
   linkOnClick: PropTypes.func.isRequired,
-  categoryFilter: PropTypes.string.isRequired
+  //categoryFilter: PropTypes.string.isRequired
 }
 
 export default ListItem

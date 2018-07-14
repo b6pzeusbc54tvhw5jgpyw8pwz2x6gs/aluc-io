@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import { setFontSizeIncrease } from "_src/store";
+//import { setFontSizeIncrease } from "_src/store";
 import theme from "_src/theme/theme.yaml"
 
 const Content = props => {
@@ -83,18 +83,18 @@ const Content = props => {
 Content.propTypes = {
   html: PropTypes.string,
   children: PropTypes.node,
-  setFontSizeIncrease: PropTypes.func.isRequired,
-  fontSizeIncrease: PropTypes.number.isRequired
+  //setFontSizeIncrease: PropTypes.func.isRequired,
+  //fontSizeIncrease: PropTypes.number.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    fontSizeIncrease: state.fontSizeIncrease
+    //fontSizeIncrease: state.fontSizeIncrease
   };
 };
 
 const mapDispatchToProps = {
-  setFontSizeIncrease
+  //setFontSizeIncrease
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Content)

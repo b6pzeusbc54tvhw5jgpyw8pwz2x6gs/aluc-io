@@ -1,4 +1,4 @@
-import { createStore as reduxCreateStore, applyMiddleware } from "redux"
+import { createStore as reduxCreateStore, applyMiddleware, combineReducers } from "redux"
 import { composeWithDevTools } from "redux-devtools-extension"
 
 /*
@@ -12,6 +12,7 @@ const SET_SCROLL_TO_TOP = "SET_SCROLL_TO_TOP"
 const SET_FONT_SIZE_INCREASE = "SET_FONT_SIZE_INCREASE"
 const SET_CATEGORY_FILTER = "SET_CATEGORY_FILTER"
 const SET_WINDOW_SIZE = "SET_WINDOW_SIZE"
+const SET_SHOW_LAYOUT = "SET_SHOW_LAYOUT"
 
 /*
  * action creators
@@ -56,8 +57,6 @@ const reducer = (state, action) => {
       return { ...state, navigatorShape: action.val }
     case SET_NAVIGATOR_FILTER:
       return { ...state, navigatorFilter: action.val }
-    case SET_WINDOW_SIZE:
-      return { ...state, windowSize: action.val }
     case SET_SCROLL_TO_TOP:
       return { ...state, scrollToTop: action.val }
     case SET_FONT_SIZE_INCREASE:
@@ -69,17 +68,38 @@ const reducer = (state, action) => {
   }
 }
 
+const initialLayout = {
+  windowSize: { width: -1, height: -1 },
+  showLayout: true,
+}
+const layoutReducer = (state=initialLayout ,action) => {
+  switch (action.type) {
+    case SET_WINDOW_SIZE:
+      return { ...state, windowSize: action.val }
+    case SET_SHOW_LAYOUT:
+      return { ...state, showLayout: action.val }
+    default:
+      return state
+  }
+}
+
+
 const initialState = {
   navigatorPosition: "is-aside",
   navigatorShape: "open",
   navigatorFilter: "",
   scrollToTop: false,
   fontSizeIncrease: 1,
-  categoryFilter: "all posts"
+  categoryFilter: "all posts",
 }
 
-const createStore = () =>
-  reduxCreateStore(reducer, initialState, composeWithDevTools(applyMiddleware()))
+const createStore = () => {
+  const reducer = combineReducers({
+    layout: layoutReducer,
+  })
+
+  return reduxCreateStore(reducer, void 0, composeWithDevTools(applyMiddleware()))
+}
 
 export default createStore
 
