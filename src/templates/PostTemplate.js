@@ -1,6 +1,5 @@
 import React from "react"
 import PropTypes from "prop-types"
-//import Main from "../components/Main/"
 import { connect } from "react-redux"
 import { graphql } from "gatsby"
 require("core-js/fn/array/find")
@@ -10,9 +9,11 @@ import { setNavigatorPosition, setNavigatorShape } from "_src/store"
 import Post from "_src/components/Post/"
 import Footer from "_src/components/Footer/"
 import Seo from "_src/components/Seo"
+import Article from "_src/components/Main/Article"
 import theme from "_src/theme/theme.yaml"
 import config from "_config/meta"
 import Layout from '../components/layout'
+import LayoutHeader from '_src/components/LayoutHeader'
 
 class PostTemplate extends React.Component {
 
@@ -23,7 +24,8 @@ class PostTemplate extends React.Component {
 
     return (
       <Layout location={this.props.location}>
-        <main>
+        <LayoutHeader config={config}/>
+        <Article>
           <Post
             post={data.post}
             slug={pathContext.slug}
@@ -33,22 +35,7 @@ class PostTemplate extends React.Component {
           />
           <Footer footnote={data.footnote} />
           <Seo config={config} data={data.post} facebook={facebook} />
-          <style jsx>{`
-            main {
-              /* position: "absolute", */
-              /* top: 0, */
-              /* left: 0, */
-              /* bottom: 0, */
-              /* width: 100%; */
-              animation-name: main-entry;
-              animation-duration: .5s;
-              @media (min-width: ${theme.mediaQueryTresholds.L}px) {
-              /* width: 100%; */
-              }
-            }
-
-          `}</style>
-        </main>
+        </Article>
       </Layout>
     )
   }

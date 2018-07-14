@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import { connect } from "react-redux"
 
 //import avatar from "_src/images/jpg/avatar.jpg"
-//import Article from "../Main/Article"
+import Article from "../Main/Article"
 //import PostHeader from "./PostHeader"
 import Headline from "./Headline"
 import Content from "../Main/Content"
@@ -34,57 +34,15 @@ const Post = connect( mapStateToProps )( props => {
   return (
     <div className='box'>
       { isWideScreen && <TOC tableOfContents={tableOfContents}/>}
-      <article>
+      <Article>
         <Headline title={title} theme={theme}/>
         <Meta prefix={prefix} authorName={authorName} category={category}/>
         <Content html={html} />
         <PostFooter author={author} post={post} slug={slug} facebook={facebook} />
-      </article>
+      </Article>
       <style jsx>{`
         .box {
           background-color: ${SHOW_LAYOUT ? 'yellow' : 'inherit'};
-        }
-        article {
-          background: ${theme.main.colors.background};
-          /* background: gray; */
-          max-width: ${theme.main.sizes.articleMaxWidth};
-          margin: 0 auto;
-/*           padding: 1rem; */
-        }
-        article strong, article b {
-          letter-spacing: -.02em;
-        }
-        article a {
-          font-weight: bold;
-          letter-spacing: -.02em;
-          text-shadow: 2px 2px ${theme.main.colors.background},
-            -2px  2px ${theme.main.colors.background},
-            -2px -2px ${theme.main.colors.background},
-            -2px  2px ${theme.main.colors.background},
-            -2px  0   ${theme.main.colors.background},
-             2px  0   ${theme.main.colors.background};
-          display: inline-block;
-          text-decoration: none;
-          transition: 0.3s;
-        }
-        article a:hover {
-          color: ${theme.main.colors.linkHover};
-        }
-        @media ${theme.mediaQuery.s} {
-          article {
-            padding: ${theme.space.layoutPadding.s};
-            padding: ${theme.space.layoutPadding.s};
-          }
-        }
-        @media ${theme.mediaQuery.m} {
-          article {
-            padding: ${theme.space.layoutPadding.m};
-          }
-        }
-        @media ${theme.mediaQuery.l} {
-          article {
-            padding: ${theme.space.layoutPadding.l};
-          }
         }
       `}</style>
     </div>

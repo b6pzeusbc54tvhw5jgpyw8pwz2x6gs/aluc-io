@@ -2,8 +2,8 @@ module.exports = ctx => ({
   plugins: {
     "postcss-easy-media-query": {
       breakpoints: {
-        tablet: 600,
-        desktop: 1024
+        m: 600,
+        l: 1024
       }
     },
     "postcss-text-remove-gap": {
