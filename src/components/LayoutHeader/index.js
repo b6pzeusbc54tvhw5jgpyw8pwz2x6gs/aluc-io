@@ -1,12 +1,13 @@
 import React from "react"
 import PropTypes from "prop-types"
 import Avatar from "@material-ui/core/Avatar"
-import cx from "classnames"
+import { connect } from "react-redux"
 import { Link } from "gatsby"
 
 import theme from "../../theme/theme.yaml"
 import ToolBox from '../ToolBox'
 import avatar from "../../images/jpg/avatar.jpg"
+import { isWideScreenSelector } from '_src/selectors/layout'
 
 const SHOW_LAYOUT = true
 
@@ -28,24 +29,14 @@ const LayoutHeader = ({ config }) => {
         }
         .box {
           transform: translate3d(0, 0, 0);
-      /*     willChange: "left, top, bottom, width", */
-      /*     position: "absolute", */
-      /*     top: 0, */
-      /*     left: 0, */
-      /*     transitionTimingFunction: "ease", */
-      /*     transition: "left .9s", */
-          width: 640px;
-      /*     background-color: theme.navigator.colors.background */
           background-color: ${SHOW_LAYOUT ? "rgba(64, 148, 64, 0.31)" : "none"};
           margin: 0 auto 0 auto;
           font-size: 1.2rem;
         }
 
         .box.postPage {
-/*           top: 20px; */
           width: 800px;
           position: relative;
-/*           padding: 0 3.5rem 0 3.5rem; */
           max-width: 50em;
           margin: 0 auto 0 auto;
           background-color: ${SHOW_LAYOUT ? "rgba(64, 148, 64, 0.31)" : "none"};
@@ -88,7 +79,7 @@ const LayoutHeader = ({ config }) => {
         }
         @media ${theme.mediaQuery.l} {
           .box {
-            padding: ${theme.space.layoutPadding.l};
+            padding: 0;
           }
         }
 
@@ -101,4 +92,11 @@ LayoutHeader.propTypes = {
   config: PropTypes.object.isRequired,
 }
 
-export default LayoutHeader
+const mapStateToProps = (state, ownProps) => ({
+  isWideScreen: isWideScreenSelector(state),
+  navigatorPosition: state.navigatorPosition,
+  navigatorShape: state.navigatorShape,
+  categoryFilter: state.categoryFilter
+})
+
+export default connect(mapStateToProps)(LayoutHeader)

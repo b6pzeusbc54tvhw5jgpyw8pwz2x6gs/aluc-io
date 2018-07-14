@@ -3,6 +3,8 @@ import { connect } from "react-redux"
 import PropTypes from "prop-types"
 import { forceCheck } from "react-lazyload"
 
+import { isWideScreenSelector } from '_src/selectors/layout'
+
 import { setNavigatorPosition, setNavigatorShape, setCategoryFilter } from "../../store"
 import List from "./List"
 import theme from "../../theme/theme.yaml"
@@ -79,10 +81,9 @@ SimplePostList.propTypes = {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  isPostPage: state.navigatorPosition === 'is-aside',
+  isWideScreen: isWideScreenSelector(state),
   navigatorPosition: state.navigatorPosition,
   navigatorShape: state.navigatorShape,
-  isWideScreen: state.isWideScreen,
   categoryFilter: state.categoryFilter
 })
 

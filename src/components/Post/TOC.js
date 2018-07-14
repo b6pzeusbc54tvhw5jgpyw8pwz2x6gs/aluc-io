@@ -12,9 +12,10 @@ const TOC = props => {
         .toc {
           width: 20rem;
           font-size: 14px;
+          position: fixed;
+          left: 4px;
         }
         .inner {
-          position: fixed;
         }
       `}</style>
     </div>
