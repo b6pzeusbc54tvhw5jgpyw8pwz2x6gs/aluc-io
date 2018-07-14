@@ -11,15 +11,6 @@ const SHOW_LAYOUT = true
 
 class SimplePostList extends React.Component {
 
-  expandOnClick = e => {
-    this.props.setNavigatorShape("open")
-    setTimeout(forceCheck, 600)
-  }
-
-  removefilterOnClick = e => {
-    this.props.setCategoryFilter("all posts")
-  }
-
   render() {
     const { posts, navigatorPosition, navigatorShape, categoryFilter } = this.props
 

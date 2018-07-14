@@ -6,6 +6,14 @@ module.exports = {
     author: 'Alfred UC',
     description: "aluc.io is alfreduc's blog",
     siteUrl: 'https://aluc.io',
+    algolia: {
+      appId: process.env.ALGOLIA_APP_ID || "",
+      searchOnlyApiKey: process.env.ALGOLIA_SEARCH_ONLY_API_KEY || "",
+      indexName: process.env.ALGOLIA_INDEX_NAME || "",
+    },
+    facebook: {
+      appId: process.env.ALUCIO_FACEBOOK_APP_ID || '',
+    },
   },
   pathPrefix: '/',
   plugins: [

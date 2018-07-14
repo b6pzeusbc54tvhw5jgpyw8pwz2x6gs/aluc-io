@@ -1,44 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import injectSheet from "react-jss";
 import { forceCheck } from "react-lazyload";
 
 import ListItem from "./ListItem";
-
-const styles = theme => ({
-  posts: {
-    //position: "static",
-    left: 0,
-    top: 0,
-    //bottom: 0,
-    width: "100%"
-  },
-  inner: {
-    //padding: `calc(${theme.bars.sizes.infoBar}px + 1.3rem) 1.3rem calc(${
-      //theme.bars.sizes.actionsBar
-    //}px + 1.3rem) 1.3rem`,
-    [`@media (min-width: ${theme.mediaQueryTresholds.M}px)`]: {
-      //padding: `calc(${theme.bars.sizes.infoBar}px + 2rem) 2rem calc(${
-        //theme.bars.sizes.actionsBar
-      //}px + 2rem) 2rem`
-    },
-    [`@media (min-width: ${theme.mediaQueryTresholds.L}px)`]: {
-      //padding: `2rem  calc(1rem + 17px) calc(2rem + 17px) 2rem`,
-      //left: `${theme.info.sizes.width}px`,
-      //".moving-featured &, .is-aside &": {
-        //padding: "1rem .5rem 1rem .5rem"
-      //}
-    }
-  },
-  list: {
-    listStyle: "none",
-    margin: 0,
-    padding: 0,
-    ".is-aside.closed &, .moving-featured.closed &": {
-      display: "none"
-    }
-  }
-});
 
 class List extends React.Component {
   componentDidUpdate(prevProps, prevState) {
@@ -49,7 +13,6 @@ class List extends React.Component {
 
   render() {
     const {
-      classes,
       posts,
       linkOnClick,
       expandOnClick,
@@ -59,9 +22,9 @@ class List extends React.Component {
     } = this.props;
 
     return (
-      <div className={classes.posts}>
-        <div className={classes.inner}>
-          <ul className={classes.list}>
+      <div className={'posts'}>
+        <div className={'inner'}>
+          <ul className={'list'}>
             {posts && posts.map((post, i) => (
               <ListItem
                 key={i}
@@ -72,13 +35,25 @@ class List extends React.Component {
             ))}
           </ul>
         </div>
+        <style jsx>{`
+          .posts {
+            left: 0px;
+            top: 0px;
+            width: 100%;
+          }
+          .inner { }
+          .list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+          }
+        `}</style>
       </div>
     );
   }
 }
 
 List.propTypes = {
-  classes: PropTypes.object.isRequired,
   posts: PropTypes.array.isRequired,
   linkOnClick: PropTypes.func.isRequired,
   expandOnClick: PropTypes.func.isRequired,
@@ -88,4 +63,4 @@ List.propTypes = {
   removeFilter: PropTypes.func.isRequired
 };
 
-export default injectSheet(styles)(List);
+export default List
