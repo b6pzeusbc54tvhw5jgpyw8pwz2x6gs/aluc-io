@@ -8,11 +8,9 @@ import theme from "../../theme/theme.yaml"
 import ToolBox from '../ToolBox'
 import avatar from "../../images/jpg/avatar.jpg"
 
-const config = { infoTitle: 'infoTitle', siteTitle: 'siteTitle' }
-
 const SHOW_LAYOUT = true
 
-const LayoutHeader = (props) => {
+const LayoutHeader = ({ config }) => {
   return (
     <div className='box'>
       <div className='avatarBox'>
@@ -100,7 +98,7 @@ const LayoutHeader = (props) => {
 }
 
 LayoutHeader.propTypes = {
-  //classes: PropTypes.object.isRequired,
+  config: PropTypes.object.isRequired,
 }
 
 export default LayoutHeader

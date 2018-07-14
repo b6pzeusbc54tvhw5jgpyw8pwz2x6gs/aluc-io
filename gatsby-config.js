@@ -3,6 +3,7 @@ const queryAndTransformer = require('./config/algoria-query-transformer')
 module.exports = {
   siteMetadata: {
     title: 'aluc.io',
+    siteTitle: 'aluc.io',
     author: 'Alfred UC',
     description: "aluc.io is alfreduc's blog",
     siteUrl: 'https://aluc.io',

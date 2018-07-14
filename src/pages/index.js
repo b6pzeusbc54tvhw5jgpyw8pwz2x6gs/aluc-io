@@ -8,6 +8,7 @@ import Layout from '../components/layout'
 import SimplePostList from '../components/SimplePostList'
 import Seo from '../components/Seo'
 import { rhythm } from '../utils/typography'
+import LayoutHeader from '../components/LayoutHeader'
 
 class BlogIndex extends React.Component {
   render() {
@@ -18,6 +19,7 @@ class BlogIndex extends React.Component {
     return (
       <Layout location={this.props.location}>
         <Seo config={config}/>
+        <LayoutHeader config={config}/>
         {posts.length > 0 && <SimplePostList posts={posts} />}
       </Layout>
     )
@@ -30,6 +32,7 @@ export const pageQuery = graphql`
   query LayoutQuery {
     site {
       siteMetadata {
+        siteTitle
         title
         author
         description
