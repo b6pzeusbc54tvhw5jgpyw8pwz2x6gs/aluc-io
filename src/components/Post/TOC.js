@@ -11,11 +11,16 @@ const TOC = props => {
       <style jsx>{`
         .toc {
           width: 20rem;
-          font-size: 14px;
+          font-size: 12px;
           position: fixed;
           left: 4px;
         }
-        .inner {
+        .inner :global(a:hover) {
+          box-shadow: none;
+          background-color: rgba(0, 128, 0, 0.2);
+        }
+        .inner :global(a) {
+          box-shadow: none;
         }
       `}</style>
     </div>
