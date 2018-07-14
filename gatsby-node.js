@@ -6,7 +6,8 @@ const { createFilePath } = require('gatsby-source-filesystem')
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
   return new Promise((resolve, reject) => {
-    const blogPost = path.resolve('./src/templates/blog-post.js')
+    //const blogPost = path.resolve('./src/templates/blog-post.js')
+    const blogPost = path.resolve('./src/templates/PostTemplate.js')
     resolve(
       graphql(`{
         allMarkdownRemark(
@@ -41,6 +42,14 @@ exports.createPages = ({ graphql, actions }) => {
           const previous = index === posts.length - 1 ? null : posts[index + 1].node;
           const next = index === 0 ? null : posts[index - 1].node;
 
+          const isPost = /^posts\//.test(post.node.fields.slug)
+          const isIndexMd = /index\.md$/.test(post.node.fileAbsolutePath)
+          console.log( isPost, isIndexMd )
+          if( isPost && ! isIndexMd ) {
+            console.log(post.node)
+            return
+          }
+
           createPage({
             path: post.node.fields.slug,
             component: blogPost,
@@ -67,10 +76,10 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 
     const slug = `/` + path.dirname(fileRelativePath)
     createNodeField({ node, name: `slug`, value: slug })
-    console.log(slug)
+    //console.log(slug)
 
     const prefix = path.basename(slug).split('--')[0]
-    console.log(prefix)
+    //console.log(prefix)
     createNodeField({ node, name: `prefix`, value: prefix })
   }
 }
@@ -108,7 +117,16 @@ exports.onCreateBabelConfig = ({ actions }) => {
       alias: {
         "_src": "./src",
         "_content": "./content",
+        "_config": "./config",
       }
     }
   })
+
+  actions.setBabelPlugin({
+    name: "babel-plugin-import",
+    options: { libraryName: "antd", style: "css" },
+  })
+
+  actions.setBabelPlugin({ name: `@babel/plugin-syntax-dynamic-import` })
+  actions.setBabelPlugin({ name: `babel-plugin-dynamic-import-webpack` })
 }
