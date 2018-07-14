@@ -1,8 +1,8 @@
+import { Link, graphql } from 'gatsby'
+import PropTypes from 'prop-types'
 import React from 'react'
-import { Link } from 'gatsby'
 import get from 'lodash/get'
 import Helmet from 'react-helmet'
-import { graphql } from "gatsby"
 
 import Layout from '../components/layout'
 import SimplePostList from '../components/SimplePostList'
@@ -26,7 +26,13 @@ class BlogIndex extends React.Component {
   }
 }
 
+
+BlogIndex.propTypes = {
+  location: PropTypes.object.isRequired,
+}
+
 export default BlogIndex
+
 
 export const pageQuery = graphql`
   query LayoutQuery {
