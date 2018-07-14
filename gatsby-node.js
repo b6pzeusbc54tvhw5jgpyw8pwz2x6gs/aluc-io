@@ -101,4 +101,14 @@ exports.onCreateBabelConfig = ({ actions }) => {
       ],
     }
   })
+
+  actions.setBabelPlugin({
+    name: "babel-plugin-module-resolver",
+    options: {
+      alias: {
+        "_src": "./src",
+        "_content": "./content",
+      }
+    }
+  })
 }
