@@ -1,15 +1,14 @@
-import React from "react"
-import PropTypes from "prop-types"
-import Avatar from "@material-ui/core/Avatar"
-import cx from "classnames"
-import { connect } from "react-redux"
-import { withRouter } from "react-router"
 import { Link } from "gatsby"
+import { connect } from "react-redux"
+import Avatar from "@material-ui/core/Avatar"
+import PropTypes from "prop-types"
+import React from "react"
+import { withRouter } from "react-router"
+import cx from "classnames"
 
-import theme from "../../theme/theme.yaml"
-import ToolBox from '../ToolBox'
-import avatar from "../../images/jpg/avatar.jpg"
 import { isWideScreenSelector } from '_src/selectors/layout'
+import avatar from "../../images/jpg/avatar.jpg"
+import theme from "../../theme/theme.yaml"
 
 const LayoutHeader = props => {
   const { config, location, showLayout } = props
@@ -27,7 +26,6 @@ const LayoutHeader = props => {
       <div className='siteTitleBox'>
         <Link className='siteTitle' to="/">{config.siteTitle}</Link>
       </div>
-      <ToolBox />
       <style jsx>{`
         .link {
           display: inline-block;
@@ -58,8 +56,8 @@ const LayoutHeader = props => {
             padding: ${theme.space.layoutPadding.l};
           }
         }
-
-        .avatarBox {
+        .avatarBox :global(img) {
+          margin-bottom: 0px;
         }
         .siteTitleBox {
           margin-top: 10px;
@@ -71,6 +69,13 @@ const LayoutHeader = props => {
           font-weight: 400;
           display: inline-block;
         }
+        .box :global(a) {
+          box-shadow: none;
+        }
+        .box :global(a:hover) {
+          text-decoration: underline;
+        }
+
         .box :global(.avatar) {
       /*     borderRadius: 65% 75%; */
           border: 1px solid #ddd;
@@ -99,7 +104,6 @@ const LayoutHeader = props => {
             padding: 0;
           }
         }
-
       `}</style>
     </div>
   )

@@ -1,18 +1,21 @@
-import React from "react"
-import PropTypes from "prop-types"
-import DeveloperBoard from 'react-icons/lib/md/developer-board'
 import { connect } from "react-redux"
+import { withRouter } from 'react-router-dom'
+import DeveloperBoard from 'react-icons/lib/md/developer-board'
+import PropTypes from "prop-types"
+import React from "react"
 import Search from 'react-icons/lib/fa/search'
+import cx from 'classnames'
 
-import theme from '_src/theme/theme.yaml'
 import { setShowLayout } from '_src/store'
+import theme from '_src/theme/theme.yaml'
 
 const ToolBox = (props) => {
 
-  const { showLayout } = props
+  const { showLayout, location } = props
+  const boxCN = cx('box', { listPage: location.pathname === '/' })
 
   return (
-    <div className='box'>
+    <div className={boxCN}>
       <div className='iconBox'>
         <DeveloperBoard
           className='icon devBoard'
@@ -23,9 +26,15 @@ const ToolBox = (props) => {
         <Search className='icon' />
       </div>
       <style jsx>{`
+        .box {
+          position: fixed;
+          right: 4px;
+        }
         .iconBox {
           transition: all .5s;
           display: inline-block;
+          display: block;
+          margin-top: 20px;
           margin-right: 10px;
         }
         .box :global(.devBoard) {
@@ -48,6 +57,7 @@ const ToolBox = (props) => {
 ToolBox.propTypes = {
   showLayout: PropTypes.bool.isRequired,
   setShowLayout: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
 }
 
 const mapDispatchToProps = {
@@ -58,5 +68,4 @@ const mapStateToProps = (state, ownProps) => ({
   showLayout: state.layout.showLayout,
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(ToolBox)
-
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ToolBox))

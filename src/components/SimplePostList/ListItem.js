@@ -8,6 +8,7 @@ class ListItem extends React.Component {
     hidden: false
   }
 
+  /*
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.categoryFilter !== this.props.categoryFilter) {
       const category = this.props.post.node.frontmatter.category
@@ -22,9 +23,10 @@ class ListItem extends React.Component {
       }
     }
   }
+  */
 
   render() {
-    const { post, linkOnClick } = this.props
+    const { post, linkOnClick, showLayout } = this.props
     const { node } = post
     const { fields } = node
     const dateStr = new Date(fields.prefix).toDateString()
@@ -50,6 +52,10 @@ class ListItem extends React.Component {
           .listItem {
             margin: 0px 0px .7em 0px;
             transition: height 1s;
+            background-color: ${showLayout ? 'rgba(255, 0, 0, 0.15)' : 'initial'};
+          }
+          .listItem:hover {
+            background-color: ${showLayout ? 'rgba(255, 0, 0, 0.5)' : 'rgba(255, 0, 0, 0.15)'};
           }
 
           .listLink {
@@ -100,7 +106,7 @@ class ListItem extends React.Component {
 ListItem.propTypes = {
   post: PropTypes.object.isRequired,
   linkOnClick: PropTypes.func.isRequired,
-  //categoryFilter: PropTypes.string.isRequired
+  showLayout: PropTypes.bool.isRequired,
 }
 
 export default ListItem

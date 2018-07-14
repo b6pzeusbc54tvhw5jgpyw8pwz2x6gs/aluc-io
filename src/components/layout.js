@@ -1,11 +1,13 @@
-import React from 'react'
+import { Link } from 'gatsby'
 import { connect } from "react-redux"
 import PropTypes from "prop-types"
-import { Link } from 'gatsby'
+import React from 'react'
 import throttle from "lodash/throttle"
 
-import { rhythm, scale } from '../utils/typography'
 import { setWindowSize } from '_src/store'
+
+import { rhythm, scale } from '../utils/typography'
+import ToolBox from './ToolBox'
 
 class Layout extends React.Component {
   componentDidMount() {
@@ -37,6 +39,7 @@ class Layout extends React.Component {
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >
+        <ToolBox />
         {children}
       </div>
     )
@@ -65,4 +68,3 @@ const mapDispatchToProps = {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Layout)
-

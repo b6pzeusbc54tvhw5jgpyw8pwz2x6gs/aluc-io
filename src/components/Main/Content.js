@@ -64,6 +64,9 @@ const Content = props => {
           padding: 0.1em 0.3em 0.2em;
           border-radius: 0.1em;
         }
+        :global(pre code.language-text) {
+          background: initial;
+        }
       }
       @keyframes bodytextEntry {
         from {

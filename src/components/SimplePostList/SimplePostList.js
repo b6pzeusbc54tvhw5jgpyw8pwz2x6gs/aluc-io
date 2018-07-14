@@ -1,13 +1,13 @@
-import React from "react"
 import { connect } from "react-redux"
-import PropTypes from "prop-types"
 import { forceCheck } from "react-lazyload"
+import PropTypes from "prop-types"
+import React from 'react'
 
 import { isWideScreenSelector } from '_src/selectors/layout'
-
-import { setNavigatorPosition, setNavigatorShape, setCategoryFilter } from "../../store"
+import { setNavigatorPosition, setNavigatorShape, setCategoryFilter } from "_src/store"
 import List from "./List"
-import theme from "../../theme/theme.yaml"
+import theme from "_src/theme/theme.yaml"
+
 class SimplePostList extends React.Component {
 
   render() {

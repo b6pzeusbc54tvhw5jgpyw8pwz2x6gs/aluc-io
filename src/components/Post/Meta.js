@@ -1,4 +1,5 @@
 import React from "react"
+import { connect } from "react-redux"
 import PropTypes from "prop-types"
 import Link from "gatsby-link"
 import FaCalendar from "react-icons/lib/fa/calendar"
@@ -8,7 +9,7 @@ import FaTag from "react-icons/lib/fa/tag"
 import theme from "_src/theme/theme.yaml"
 
 const Meta = props => {
-  const { prefix, authorName, category } = props
+  const { prefix, authorName, category, showLayout } = props
 
   return (
     <p className="meta">
@@ -27,26 +28,35 @@ const Meta = props => {
 
       <style jsx>{`
         .meta {
-          display: flex;
-          flex-flow: row wrap;
-          font-size: 0.8em;
           margin: ${theme.space.m} 0;
-          background: transparent;
-
+          background: ${showLayout ? 'rgba(75, 0, 130, 0.18)' : 'transparent'};
           :global(svg) {
             fill: ${theme.icon.color};
             margin: ${theme.space.inline.xs};
           }
+
           span {
-            align-items: center;
-            display: flex;
-            text-transform: uppercase;
             margin: ${theme.space.xs} ${theme.space.s} ${theme.space.xs} 0;
+            background: ${showLayout ? 'rgba(75, 0, 130, 0.21)' : 'transparent'};
           }
         }
         @from-width tablet {
           .meta {
             margin: ${`calc(${theme.space.m} * 1.5) 0 ${theme.space.m}`};
+          }
+        }
+      `}</style>
+      <style jsx>{`
+        .meta {
+          display: flex;
+          flex-flow: row wrap;
+          font-size: 0.8em;
+          transition: all .3s;
+
+          span {
+            align-items: center;
+            display: flex;
+            text-transform: uppercase;
           }
         }
       `}</style>
@@ -58,6 +68,11 @@ Meta.propTypes = {
   prefix: PropTypes.string.isRequired,
   authorName: PropTypes.string.isRequired,
   category: PropTypes.string,
+  showLayout: PropTypes.bool.isRequired,
 }
 
-export default Meta
+const mapStateToProps = (state, ownProps) => ({
+  showLayout: state.layout.showLayout,
+})
+
+export default connect(mapStateToProps)(Meta)

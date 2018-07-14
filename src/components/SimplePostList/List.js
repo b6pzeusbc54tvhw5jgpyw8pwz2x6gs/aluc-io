@@ -1,22 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { forceCheck } from "react-lazyload";
+import { connect } from 'react-redux'
+import { forceCheck } from "react-lazyload"
+import PropTypes from "prop-types"
+import React from "react"
 
-import ListItem from "./ListItem";
+import ListItem from "./ListItem"
 
 class List extends React.Component {
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.categoryFilter !== this.props.categoryFilter) {
-      setTimeout(forceCheck, 300);
-    }
-  }
 
   render() {
-    const {
-      posts,
-      linkOnClick,
-      categoryFilter,
-    } = this.props;
+    const { posts, linkOnClick } = this.props;
+    const { showLayout } = this.props;
 
     return (
       <div className={'posts'}>
@@ -27,7 +20,8 @@ class List extends React.Component {
                 key={i}
                 post={post}
                 linkOnClick={linkOnClick}
-                categoryFilter={categoryFilter}
+                categoryFilter={null}
+                showLayout={showLayout}
               />
             ))}
           </ul>
@@ -53,7 +47,12 @@ class List extends React.Component {
 List.propTypes = {
   posts: PropTypes.array.isRequired,
   linkOnClick: PropTypes.func.isRequired,
+  showLayout: PropTypes.bool.isRequired,
   //categoryFilter: PropTypes.string.isRequired,
 };
 
-export default List
+const mapStateToProps = (state, ownProps) => ({
+  showLayout: state.layout.showLayout,
+})
+
+export default connect(mapStateToProps)(List)
