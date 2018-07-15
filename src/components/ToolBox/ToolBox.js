@@ -30,6 +30,20 @@ const ToolBox = (props) => {
       </Link>
       <style jsx>{`
         .box {
+          background-color: ${showLayout ? 'rgba(234, 151, 255, 0.23)' : 'initial'};
+        }
+        .iconBox {
+          background-color: ${showLayout ? 'rgba(124, 200, 255, 0.8)' : 'initial'};
+        }
+        .box :global(.icon) {
+          fill: ${theme.color.neutral.gray.k};
+        }
+        .box :global(.icon):hover {
+          fill: ${theme.color.neutral.gray.f};
+        }
+      `}</style>
+      <style jsx>{`
+        .box {
           position: fixed;
           right: 4px;
         }
@@ -41,16 +55,12 @@ const ToolBox = (props) => {
           margin-right: 10px;
         }
         .box :global(.devBoard) {
-          transform: translateY(2px) scale(1.25);
+          transform: translateY(2px) scale(1.18);
         }
         .box :global(.icon) {
           width: 36px;
           height: 36px;
           cursor: pointer;
-          fill: ${theme.color.neutral.gray.gray};
-        }
-        .box :global(.icon):hover {
-          fill: ${theme.color.neutral.gray.f};
         }
       `}</style>
     </div>

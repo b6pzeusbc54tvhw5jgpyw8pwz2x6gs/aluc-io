@@ -14,7 +14,7 @@ const Search = props => {
     <div><Hit showLayout={showLayout} hit={p.hit} siteUrl={siteUrl}/></div>
 
   return (
-    <div>
+    <div className='box'>
       {algolia && algolia.appId && (
         <InstantSearch
           appId={algolia.appId}
@@ -27,6 +27,9 @@ const Search = props => {
           <Pagination />
         </InstantSearch>
       )}
+      <style jsx>{`
+        margin-top: 60px;
+      `}</style>
       <style jsx global>{`
         .ais-SearchBox {
           width: 100%;

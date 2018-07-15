@@ -8,7 +8,7 @@ import PostComments from "./PostComments";
 import theme from "_src/theme/theme.yaml"
 
 const PostShare = asyncComponent({
-  resolve: () => System.import('./PostShare'),
+  resolve: () => import('./PostShare'),
   LoadingComponent: () => <div>Loading</div>, // Optional
   ErrorComponent: ({ error }) => <div>{error.message}</div>, // Optional
 })

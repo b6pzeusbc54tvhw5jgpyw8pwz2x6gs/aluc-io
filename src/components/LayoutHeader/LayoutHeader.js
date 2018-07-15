@@ -12,7 +12,6 @@ import theme from "../../theme/theme.yaml"
 
 const LayoutHeader = props => {
   const { config, location, showLayout } = props
-  console.log( props )
 
   const boxCN = cx('box', { listPage: location.pathname === '/' })
 

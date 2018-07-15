@@ -14,7 +14,7 @@ import TOC from "./TOC"
 
 const SHOW_LAYOUT = false
 
-const Post = connect( mapStateToProps )( props => {
+const Post = props => {
   const { post, author, slug, facebook } = props
   const { tableOfContents } = props
   const { canRenderTOC } = props
@@ -44,7 +44,7 @@ const Post = connect( mapStateToProps )( props => {
       `}</style>
     </div>
   )
-})
+}
 
 const mapStateToProps = (state, ownProps) => {
   return {
