@@ -7,7 +7,7 @@ published: true
 
 [Serverless Framework][serverless_framework] 는 AWS Lambda 와 API Gateway 와
 같은 **serverless architecture** 들을 설정 코드를 통해 쉽게 배포하고 관리 할 수
-있는 툴이다. 평소 API Gateway 와 Lambda 를 Web Console 을 통해 접해봤거나
+있는 툴이다. 평소 API Gateway 와 Lambda 를 Web Console 을 통해 접해봤거나Hl
 혹은 어떤 서비스인지 대충 알고만 있어도 serverless 를 시작하기에 무리가 없다.
 
 serverless 라는 용어는 이 포스트에서 다룰 `serverless` 라는 툴을 의미하기도 하며
@@ -276,7 +276,7 @@ s3 버킷 이름등을 하드코딩하면 다른 환경에서 사용하거나 �
 사용하는 사람은 코드를 수정해야만 할 것이다. 환경 마다 달라질 수 있는 부분은
 환경변수로 따로 빼는 것이 좋다. 이런 환경변수를 `.envrc` 파일에 추가하자.
 
-```
+```sh
 # .envrc
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXXXXX
 export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -298,11 +298,11 @@ $ aws s3 cp image2.jpg s3://$SLS_BUCKET_NAME/
 ```
 
 ## Labmda Function 에 환경변수 사용하기
-`handler.js` 에 `getObjectList` 라는 named export 함수를 아래와 같이 하나 더
+`handler.js` 에 `s3ObjectList` 라는 named export 함수를 아래와 같이 하나 더
 만들자.
 
 ```diff
-+module.exports.getObjectList = (event, context, callback) => {
++module.exports.s3ObjectList = (event, context, callback) => {
 +  const s3 = new AWS.S3({apiVersion: '2006-03-01'});
 +  const params = { Bucket: process.env.SLS_BUCKET_NAME, MaxKeys: 10 };
 +  s3.listObjects(params, (err,data) => {
@@ -343,8 +343,8 @@ Function 으로 실행되는 코드이다. 아무리 `source .envrc` 로 로컬�
 +    environment:
 +      ENV_FOR_HELLO: env_for_hello
 +      SLS_BUCKET_NAME: check-environment
-   getObjectList:
-     handler: handler.getObjectList
+   s3ObjectList:
+     handler: handler.s3ObjectList
 ```
 
 연습을 위해 `hello` handler 아래에도 environment 를 추가했다. 여기의
@@ -354,24 +354,206 @@ Function 으로 실행되는 코드이다. 아무리 `source .envrc` 로 로컬�
 
 ```sh
 $ npx sls deploy -v
-$ npx sls invoke -f getObjectList
-$ npx sls invoke -f getObjectList | jq .body.Contents[].Key
+$ npx sls invoke -f s3ObjectList
+$ npx sls invoke -f s3ObjectList | jq -r .body | jq .Contents[].Key
 ```
 
 자알 가져온다.
 
-rek 는 하고...
-dynamo faker vs webpack 둘중하나만 해야함
+# 모듈화 & 서드파티 모듈 사용하기
+npm 을 통해 설치한 서드파티 모듈을 사용하는 Lambda Function 을 작성해보자.  흔한
+예제인 이미지 리사이징을 해볼텐데, s3 의 이미지를 가져오고, 리사이징하고, 다시
+업로드 시키는 함수는 다음과 같다.
 
-## event 설정
-이것을 http GET 메소드 `/hello`
-라는 패스를 통해 트리거 시킬 수 있도록 API Gateway 를 설정하라는 의미이다.  해본
-사람은 알겠지만 AWS Web Console 로 이정도 설정 하는 것도 꽤 귀찮고 어려운
-작업이다.  `serverless` 의 첫번째 장점이 바로 이런 복잡한 인프라 자원의 설정을
-yml 파일을 통해 알아서 자동으로 해주는 `Infrastructure as code` 를 구현할 수
-있게 해주는 점이다.
+```js
+// src/imgUtil.js
+import AWS from 'aws-sdk'
+import path from 'path'
+import fs from 'fs'
+import { ulid } from 'ulid'
+import _gm from 'gm'
+
+const gm = _gm.subClass({ imageMagick: true })
+const s3 = new AWS.S3()
+
+export const downloadImage = (bucketName, key) => new Promise((resolve, reject) => {
+  const destPath = path.join('/tmp', (new Date()).getTime().toString())
+  s3.getObject({ Bucket: bucketName, Key: key }).promise().then( data => {
+    fs.writeFile(destPath, data.Body, err => err ? reject(err) : resolve(destPath))
+  }).catch( reject )
+})
+
+export const getImageInfo = imagePath => new Promise((resolve, reject) => {
+  gm(imagePath).identify((err, info) => err ? reject(err) : resolve(info))
+})
+
+export const resizeImage = (info, size) => new Promise((resolve, reject) => {
+  const resizeOpts = /^(\d+)x(\d+)([%@!<>])?$/g.exec( size )
+  gm(info.path).resize(resizeOpts[1], resizeOpts[2], resizeOpts[3])
+ .toBuffer(info.format, (err, buffer) => err ? reject(err) : resolve(buffer))
+})
+
+export const uploadImage = (buffer, info, bucketName, prefix) =>
+  s3.upload({
+    Bucket: bucketName,
+    Key: `${prefix}/${ulid()}.${info.format}`,
+    Body: buffer,
+    ContentType: info['Mime type'],
+  }).promise()
+```
+
+handler.js 쪽에서 이 코드를 불러와 사용해보자. 테스트로 objectList 로 가져온
+0번째 이미지를 리사이즈 해볼 것 이다. js 파일들이 1개 이상 되었으므로 설정
+파일과 실제 동작하는 코드를 분리하기 위해 코드들을 `src/` 디렉토리 밑으로 넣는
+리팩토링도 함께 진행하자.
+
+```diff
+const AWS = require('aws-sdk')
++const imgUtil = require('./imgUtil')
+
++module.exports.resize = (event, context, callback) => {
++  let imgInfo
++  s3.listObjects({ Bucket: BUCKET_NAME }).promise().then( objectList => {
++    console.log( JSON.stringify(objectList,null,2) )
++    return downloadImage( BUCKET_NAME, objectList.Contents[0].Key )
++
++  }).then( imgPath => {
++    console.log( `imgPath: ${imgPath}` )
++    return getImageInfo( imgPath )
++
++  }).then( _imgInfo => {
++    imgInfo = _imgInfo
++    console.log( 'imgInfo: ' )
++    console.log( JSON.stringify(imgInfo,null,2) )
++    return resizeImage(imgInfo, '800x600')
++
++  }).then( buffer => {
++    return uploadImage(buffer, imgInfo, BUCKET_NAME, 'resize')
++
++  }).then( data => {
++    callback(null, { statusCode: 200, body: JSON.stringify(data,null,2) })
++
++  }).catch( err => {
++    callback(err)
++  })
++}
+```
 
 
+## serverless-webpack
+위에서 `package` 설정을 했기 때문에 배포하게되면 여전히 handler.js 파일 하나만
+올라가게 되는 것을 볼 수 있다. 어떻게 해야 할까?
+
+package 설정에 include 로 `imgUtil.js` 파일을 추가해주고, 이 파일에서 사용하는
+`gm` 이라는 모듈이 올라가도록 `node_modules/gm` 을 추가해주면 될까?  답부터
+말하자면 좋지 않은 방법이다. 파일이나 모듈을 하나 추가할 때마다 `serverless.yml`
+파일 package.include 에 설정을 하나씩 추가해야 하는 것은 굉장히 귀찮을 뿐만
+아니라 `gm` 모듈이 사용하는 sub dependencies 들이 모두 `node_modules/gm` 아래에
+설치된다는 보장도 없다. 다른 방법을 찾아야 하는데 그 해답은 `webpack` 이다.
+
+webpack 은 브라우저에서 모던 javascript 코드를 돌리기 위한 bundling, minify 등의
+전처리를 해주는 툴인데, `nodejs` 환경에서도 사용 할 수 있으며, `gm` 모듈과 같은
+서드파티 모듈들을 실행가능한 단일 bundle 파일로 만들어주는 기능을 사용 할
+것이다. `serverless-webpack` plugin 을 사용하면 serverless 배포시 자동으로
+실행해주고 오프라인 개발환경까지 지원해준다.
+
+```
+$ yarn add webpack serverless-webpack
+$ yarn add babel-loader babel-core babel-preset-env
+```
+
+webpack 은 다음과 같은 `webpack.config.js` 설정 파일을 사용한다.
+
+```js
+const path = require('path')
+const slsw = require('serverless-webpack')
+const _ = require('lodash')
+
+module.exports = {
+  mode: slsw.lib.webpack.isLocal ? "development" : "production",
+  entry: _.isEmpty(slsw.lib.entries) ? './handler.js' : slsw.lib.entries,
+  output: {
+    libraryTarget: 'commonjs',
+    path: path.resolve(__dirname, '.webpack'),
+    filename: 'handler.js',
+  },
+  module: {
+    rules: [{
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'babel-loader',
+      options: {
+        presets: ['env'],
+      }
+    }],
+  },
+  target: 'node',
+  externals: ['aws-sdk'],
+}
+```
+
+test 해보자.
+```
+$ npx webpack
+Hash: b7e7a2496ea7f73e2ccc
+Version: webpack 4.16.1
+Time: 2378ms
+Built at: 2018-07-22 16:06:20
+     Asset    Size  Chunks             Chunk Names
+handler.js  61 KiB       0  [emitted]  main
+Entrypoint main = handler.js
+ [0] external "fs" 42 bytes {0} [built]
+ [2] external "path" 42 bytes {0} [built]
+ [3] external "child_process" 42 bytes {0} [built]
+ [4] external "util" 42 bytes {0} [built]
+ [5] external "os" 42 bytes {0} [built]
+ [6] external "aws-sdk" 42 bytes {0} [built]
+ [7] external "stream" 42 bytes {0} [built]
+[13] ./src/handler.js 2.12 KiB {0} [built]
+[14] ./src/imgUtil.js 2 KiB {0} [built]
+[16] external "crypto" 42 bytes {0} [optional] [built]
+[18] external "events" 42 bytes {0} [built]
+[50] external "tty" 42 bytes {0} [built]
+    + 45 hidden modules
+```
+
+좀 더 자세한 로그를 보고싶다면 `--display-modules` 옵션을 붙여서 다시한번
+실행해보자.  `fs` 같은 nodejs native library 들은 `external` 디펜던시로 처리되어
+함께 번들링 되지 않는다. 또한 `aws-sdk` 도 Lambda 실행환경에서 제공되기 때문에
+올릴 필요가 없어서 webpack 설정의 `externals` 설정으로 번들링을 제외시키는 것이
+좋다.
+
+`serverless.yml` 에 `serverless-webpack` 설정을 해야한다.
+
+```yaml
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    includeModules: false
+    webpackConfig: webpack.config.js
+    packager: yarn
+```
+
+이제 serverless deploy 하게 되면 자동으로 webpack 이 실행되며 번들링된 파일이
+패키징되어 upload 된다.
+
+```
+$ npx sls deploy -v
+```
+
+에러 없이 배포와 실행이 잘 되었다면 AWS Web Console 을 통해 `resize` prefix 아래
+resize 된 파일이 생성되었는지 확인하자.
+
+# event 설정
+지금까지는 serverless 의 invoke 명령을 통해서 즉, 내부적으로 AWS API 를 통해
+Lambda Function 을 트리거 시켰다. events 설정을 통해 Lambda Function 을 여러가지
+방법으로 트리거 시킬 수 있다. 가장 많이 사용되는 2가지 방법에 대해 알아보자.
+
+## API Gateway
+API Gateway 를 통해 http 요청으로 Lambda Funtion 을 트리거 시킬 수 있게 각각의
+Function 에 `events` 설정을 추가해보자.
 
 ```diff
  functions:
@@ -381,8 +563,100 @@ yml 파일을 통해 알아서 자동으로 해주는 `Infrastructure as code` �
 +      - http:
 +          path: hello
 +          method: get
+   s3ObjectList:
+     handler: handler.s3ObjectList
++    events:
++      - http:
++          path: s3ObjectList
++          method: get
 ```
 
+이것은 handler.hello Function 을 `/hello` path 로, handler.s3ObjectList 를
+`/getObjectLilst` path 를 통해 트리거 시킬 수 있도록 API Gateway 를 설정하라는
+의미이다.  해본 사람은 알겠지만 AWS Web Console 로 이정도 설정 하는 것도 꽤
+귀찮고 어려운 작업이다.  `serverless` 의 첫번째 장점이 바로 이런 복잡한 인프라
+자원의 설정을 yml 파일을 통해 알아서 자동으로 해주는 `Infrastructure as code` 를
+구현할 수 있게 해주는 점이다. 배포해보자.
+
+```
+$ npx sls deploy --verbose
+Serverless: Packaging service...
+Serverless: Excluding development dependencies...
+Serverless: Uploading CloudFormation file to S3...
+Serverless: Uploading artifacts...
+Serverless: Uploading service .zip file to S3 (651 B)...
+Serverless: Validating template...
+Serverless: Updating Stack...
+Serverless: Checking Stack update progress...
+......................
+Serverless: Stack update finished...
+Service Information
+service: my-first-serverless-service
+stage: dev
+region: ap-northeast-2
+stack: my-first-serverless-service-dev
+api keys:
+  None
+endpoints:
+  GET - https://l4gj9125q9.execute-api.ap-northeast-2.amazonaws.com/dev/hello
+  GET - https://l4gj9125q9.execute-api.ap-northeast-2.amazonaws.com/dev/s3ObjectList
+functions:
+  hello: my-first-serverless-service-dev-hello
+  getObjectList: my-first-serverless-service-dev-getObjectList
+Serverless: Removing old service artifacts from S3...
+```
+
+output 의 `endpoints` 를 주목하자. `l4gj9125q9` 와 같이 고유의 API Gateway
+주소가 생성되고 2개의 주소를 각각 브라우저로 접속해서 결과가 잘 나오는지
+확인해보자.
+
+## S3 ObjectCreated event
+s3 에 파일을 업로드하면 발생하는 ObjectCreated 이벤트로 Lambda Function 을
+호출해보자. 위에서 작성한 resize handler 는 s3 `upload` prefix 아래에 있는
+첫번재 이미지를 resize 하게 작성되어 있다. 이것을 조금 변경하여 `upload` prefix
+로 새로운 이미지가 올라왔을때 그 이미지를 resize 한뒤 `resize` prefix 에 업로드
+시키는 코드로 변경해보자.
+
+```diff
+  resize:
+    handler: handler.resize
+    events:
+    - s3:
+      bucket: ${env:SLS_BUCKET_NAME}
+        event: s3:ObjectCreated:*
+        rules:
+        - suffix: .png
+```
+
+### serverless-plugin-exist-s3
+
+
+
+# react
+마지막으로 지금까지 만든 기능들을 Web UI 로 만들어보자.  react 를 사용할 것인데
+webpack 을 이미 적용했기 때문에 server side 렌더링을 위한 코드만 몇 줄 적으면
+react 로 만든 웹 페이지도 어렵지 않게 추가 할 수 있다.
+
+```
+$ yarn add react react-dom babel-preset-react
+```
+
+```js
+// App.js
+```
+
+html 페이지를 내려주는 Labmda Function 하나를 더 만들어 보자.
+
+```yml
+
+```
+
+s3 에 있는 이미지 파일들은 s3 버킷이 public 설정이 되어있지 않는 한 접근 할 수 없다.
+하지만 public 설정은 보안에 취약하고 
+
+# SNS
+마지막으로 serverless 설정 몇줄을 추가하여 Lambda Function 에 에러가 있을때
+AWS SNS 를 통해 알림을 받도록 추가해보자.
 
 
 
@@ -393,3 +667,6 @@ yml 파일을 통해 알아서 자동으로 해주는 `Infrastructure as code` �
 https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
 https://github.com/serverless/examples
 [aws_sdk_js]: https://github.com/aws/aws-sdk-js
+
+https://github.com/mgi166/serverless-image-resizer/blob/master/src/imageResizer.js
+
