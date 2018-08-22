@@ -22,12 +22,15 @@ class PostTemplate extends React.Component {
     const { data, pathContext } = this.props
     const tableOfContents = data.post.tableOfContents
     const facebook = (((data || {}).site || {}).siteMetadata || {}).facebook
+    const { location } = this.props
+    console.log(location);
 
     return (
-      <Layout location={this.props.location}>
-        <LayoutHeader config={config}/>
+      <Layout location={location}>
+        { location.pathname !== '/pages/1--about' && <LayoutHeader config={config}/>}
         <Article>
           <Post
+            location={location}
             post={data.post}
             slug={pathContext.slug}
             author={data.author}

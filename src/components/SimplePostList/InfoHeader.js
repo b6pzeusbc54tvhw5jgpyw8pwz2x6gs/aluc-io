@@ -5,7 +5,7 @@ import Link from "gatsby-link";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
-import avatar from "../../images/jpg/avatar.jpg";
+import avatar from "../../images/newavatar.jpg";
 import config from "../../../content/meta/config";
 
 const styles = theme => ({

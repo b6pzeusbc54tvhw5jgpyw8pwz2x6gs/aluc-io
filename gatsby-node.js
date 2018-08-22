@@ -36,8 +36,7 @@ exports.createPages = ({ graphql, actions }) => {
         }
 
         // Create blog posts pages.
-        let posts = result.data.allMarkdownRemark.edges;
-
+        let posts = result.data.allMarkdownRemark.edges
         posts = _.reject(posts, post => {
           const isPost = /^\/posts\//.test(post.node.fields.slug)
           const isIndexMd = /index\.md$/.test(post.node.fileAbsolutePath)
@@ -69,7 +68,13 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
   if (node.internal.type === `MarkdownRemark`) {
     const contentsPath = path.resolve('./contents')
 
+
     const fileRelativePath = path.relative(contentsPath, node.fileAbsolutePath)
+
+    const isPost = /^posts\//.test(fileRelativePath)
+    const isIndexMd = /index\.md$/.test(fileRelativePath)
+    if( isPost && ! isIndexMd ) return
+
     createNodeField({ node, name: `fileRelativePath`, value: fileRelativePath })
 
     const slug = `/` + path.dirname(fileRelativePath)

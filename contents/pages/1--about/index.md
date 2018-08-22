@@ -2,6 +2,8 @@
 title: About me
 ---
 
+![avatar](./newavatar.jpg)
+
 - I'm a Software Engineer in Korea.
 - I'm currently employed at a smartphone manufacturing company.
 - I love Web Frontend like react.
@@ -12,7 +14,10 @@ title: About me
 - I'm interested in Go.
 - I'm interested in Infrastructure as code like a terraform.
 - I love Kubernetes.
+
 - I love automation.
+![avatar](./keynote2.jpg)
+
 - I'm interested in Effective Developer Experience.
 - I'm working on build CI & CD environment.
 - I will try to develop React Native.
@@ -20,12 +25,20 @@ title: About me
 - I love to use new develop tool.
 - I love MacOS.
 - I love Ubuntu.
+
 - I love Docker.
+![avatar](./keynote1.jpg)
+
 - I love git.
 - I love markdown.
 - I love immutable something.
 - I love CLI better than GUI.
 - I'm interested in collaborative workflow.
+
+- I love AWS
+![aws](./mensa-aws.jpg)
+![remote](./watchonRemote.jpg)
+![watchonRemote](./milkweb.jpg)
 
 ---
 
@@ -39,3 +52,4 @@ title: About me
 - Special Thanks to [@greglobinski][greglobinski]
 
 [greglobinski]: https://twitter.com/greglobinski
+

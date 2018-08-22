@@ -7,7 +7,7 @@ import { withRouter } from "react-router"
 import cx from "classnames"
 
 import { isWideScreenSelector } from '_src/selectors/layout'
-import avatar from "../../images/jpg/avatar.jpg"
+import avatar from "../../images/newavatar.jpg"
 import theme from "../../theme/theme.yaml"
 
 const LayoutHeader = props => {
@@ -18,7 +18,7 @@ const LayoutHeader = props => {
   return (
     <div className={boxCN}>
       <div className='avatarBox'>
-        <Link className='link' to="/">
+        <Link className='link' to="/pages/1--about">
           <Avatar alt={config.infoTitle} src={avatar} className='avatar' />
         </Link>
       </div>

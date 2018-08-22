@@ -8,8 +8,8 @@ import ListItem from "./ListItem"
 class List extends React.Component {
 
   render() {
-    const { posts, linkOnClick } = this.props;
-    const { showLayout } = this.props;
+    const { posts, linkOnClick } = this.props
+    const { showLayout } = this.props
 
     return (
       <div className={'posts'}>

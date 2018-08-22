@@ -18,6 +18,7 @@ const Post = props => {
   const { post, author, slug, facebook } = props
   const { tableOfContents } = props
   const { canRenderTOC } = props
+  const { location } = props
   const frontmatter = (post || {}).frontmatter
 
   const title = frontmatter.title
@@ -33,7 +34,7 @@ const Post = props => {
       { canRenderTOC && <TOC tableOfContents={tableOfContents}/>}
       <Article>
         <Headline title={title} theme={theme}/>
-        <Meta prefix={prefix} authorName={authorName} category={category}/>
+        { location.pathname !== '/pages/1--about' && <Meta prefix={prefix} authorName={authorName} category={category}/>}
         <Content html={html} />
         <PostFooter author={author} post={post} slug={slug} facebook={facebook} />
       </Article>

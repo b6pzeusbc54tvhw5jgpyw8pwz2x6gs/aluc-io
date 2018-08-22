@@ -17,7 +17,7 @@ const Seo = props => {
   const siteImage = postCover ? postCover : config.siteImage
   const url = config.siteUrl + config.pathPrefix + postSlug
 
-  const image = (((siteImage || {}).childImageSharp || {}).resize || {}).url || config.siteUrl + "/avatar.jpg"
+  const image = (((siteImage || {}).childImageSharp || {}).resize || {}).url || config.siteUrl + "/images/newavatar.jpg"
 
   return (
     <Helmet

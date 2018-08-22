@@ -8,6 +8,9 @@ Wordpress2016.overrideThemeStyles = () => ({
   'a': {
     boxShadow: 'none',
   },
+  'body': {
+    fontFamily: "Open Sans",
+  },
 })
 
 delete Wordpress2016.googleFonts

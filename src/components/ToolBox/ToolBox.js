@@ -2,6 +2,7 @@ import { Link } from 'gatsby'
 import { connect } from "react-redux"
 import { withRouter } from 'react-router-dom'
 import DeveloperBoard from 'react-icons/lib/md/developer-board'
+import Home from 'react-icons/lib/fa/home'
 import PropTypes from "prop-types"
 import React from "react"
 import Search from 'react-icons/lib/fa/search'
@@ -26,6 +27,11 @@ const ToolBox = (props) => {
       <Link to='/search'>
         <div className='iconBox'>
           <Search className='icon' />
+        </div>
+      </Link>
+      <Link to='/'>
+        <div className='iconBox'>
+          <Home className='icon' />
         </div>
       </Link>
       <style jsx>{`
