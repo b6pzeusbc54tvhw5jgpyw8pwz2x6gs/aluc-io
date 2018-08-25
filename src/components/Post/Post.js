@@ -34,7 +34,7 @@ const Post = props => {
       { canRenderTOC && <TOC tableOfContents={tableOfContents}/>}
       <Article>
         <Headline title={title} theme={theme}/>
-        { location.pathname !== '/pages/1--about' && <Meta prefix={prefix} authorName={authorName} category={category}/>}
+        { !/\/pages\/1--about\/?$/.test(location.pathname) && <Meta prefix={prefix} authorName={authorName} category={category}/>}
         <Content html={html} />
         <PostFooter author={author} post={post} slug={slug} facebook={facebook} />
       </Article>
@@ -60,6 +60,7 @@ Post.propTypes = {
   facebook: PropTypes.object.isRequired,
   canRenderTOC: PropTypes.bool.isRequired,
   tableOfContents: PropTypes.string.isRequired,
+  location: PropTypes.object.isRequired,
 }
 
 

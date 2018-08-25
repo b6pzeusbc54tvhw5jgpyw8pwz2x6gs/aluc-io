@@ -70,7 +70,7 @@ const reducer = (state, action) => {
 
 const initialLayout = {
   windowSize: { width: -1, height: -1 },
-  showLayout: true,
+  showLayout: false,
 }
 const layoutReducer = (state=initialLayout ,action) => {
   switch (action.type) {

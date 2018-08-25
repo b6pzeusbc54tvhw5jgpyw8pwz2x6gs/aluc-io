@@ -27,7 +27,7 @@ class PostTemplate extends React.Component {
 
     return (
       <Layout location={location}>
-        { location.pathname !== '/pages/1--about' && <LayoutHeader config={config}/>}
+        { !/\/pages\/1--about\/?$/.test(location.pathname)  && <LayoutHeader config={config}/>}
         <Article>
           <Post
             location={location}

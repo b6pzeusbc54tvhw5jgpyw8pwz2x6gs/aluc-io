@@ -2,8 +2,7 @@
 title: serverless react
 subTitle: serverless react
 category: guide
-published: true
----
+published: true ---
 
 [Serverless Framework][serverless_framework] 는 AWS Lambda 와 API Gateway 와
 같은 **serverless architecture** 들을 설정 코드를 통해 쉽게 배포하고 관리 할 수
@@ -629,8 +628,7 @@ s3 에 파일을 업로드하면 발생하는 ObjectCreated 이벤트로 Lambda 
 ```
 
 ### serverless-plugin-exist-s3
-
-
+// TODO
 
 # react
 마지막으로 지금까지 만든 기능들을 Web UI 로 만들어보자.  react 를 사용할 것인데
@@ -651,8 +649,8 @@ html 페이지를 내려주는 Labmda Function 하나를 더 만들어 보자.
 
 ```
 
-s3 에 있는 이미지 파일들은 s3 버킷이 public 설정이 되어있지 않는 한 접근 할 수 없다.
-하지만 public 설정은 보안에 취약하고 
+s3 에 있는 이미지 파일들은 s3 버킷이 public 설정이 되어있지 않는 한 접근 할 수
+없다. 하지만 public 설정은 보안에 취약하고 presigned url 을 통해 내려주자.
 
 # SNS
 마지막으로 serverless 설정 몇줄을 추가하여 Lambda Function 에 에러가 있을때
@@ -663,10 +661,9 @@ AWS SNS 를 통해 알림을 받도록 추가해보자.
 
 [serverless]: https://serverless.com/
 [serverless_framework]: https://serverless.com/framework/
+[aws_sdk_js]: https://github.com/aws/aws-sdk-js
 
 https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
 https://github.com/serverless/examples
-[aws_sdk_js]: https://github.com/aws/aws-sdk-js
-
 https://github.com/mgi166/serverless-image-resizer/blob/master/src/imageResizer.js
 

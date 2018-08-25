@@ -1,5 +1,5 @@
 ---
-title: About me
+title: $ whoami
 ---
 
 - I'm Alfred UC
