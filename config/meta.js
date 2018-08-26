@@ -36,6 +36,4 @@ module.exports = {
   facebook: {
     appId: process.env.ALUCIO_FACEBOOK_APP_ID || '',
   },
-
-
 }

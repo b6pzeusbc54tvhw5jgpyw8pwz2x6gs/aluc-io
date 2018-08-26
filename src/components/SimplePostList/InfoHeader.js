@@ -5,8 +5,8 @@ import Link from "gatsby-link";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
-import avatar from "../../images/newavatar.jpg";
-import config from "../../../content/meta/config";
+import avatar from "_contents/pages/1--about/newavatar.jpg"
+import meta from "_config/meta";
 
 const styles = theme => ({
   header: {
@@ -116,8 +116,8 @@ const InfoHeader = props => {
         </div>
       </Link>
       <h1 className={classes.title}>
-        {config.infoTitle.replace(/ /g, "\u00a0")}
-        <small>{config.infoTitleNote}</small>
+        {meta.infoTitle.replace(/ /g, "\u00a0")}
+        <small>{meta.infoTitleNote}</small>
       </h1>
       <IconButton
         aria-label="Expand the box"

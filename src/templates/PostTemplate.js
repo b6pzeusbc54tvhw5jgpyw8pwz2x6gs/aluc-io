@@ -23,7 +23,6 @@ class PostTemplate extends React.Component {
     const tableOfContents = data.post.tableOfContents
     const facebook = (((data || {}).site || {}).siteMetadata || {}).facebook
     const { location } = this.props
-    console.log(location);
 
     return (
       <Layout location={location}>

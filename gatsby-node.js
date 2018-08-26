@@ -87,7 +87,7 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
   }
 }
 
-exports.onCreateWebpackConfig = ({ stage, actions }) => {
+exports.onCreateWebpackConfig = ({ stage, actions, plugins }) => {
   actions.setWebpackConfig({
     module: {
       rules: [
@@ -99,7 +99,17 @@ exports.onCreateWebpackConfig = ({ stage, actions }) => {
           }
         }
       ]
-    }
+    },
+    plugins: [
+      plugins.define({
+        'process.env.ALUCIO_SITE_URL': JSON.stringify(process.env.ALUCIO_SITE_URL),
+        'process.env.ALGOLIA_APP_ID': JSON.stringify(process.env.ALGOLIA_APP_ID),
+        'process.env.ALGOLIA_SEARCH_ONLY_API_KEY': JSON.stringify(process.env.ALGOLIA_SEARCH_ONLY_API_KEY),
+        'process.env.ALGOLIA_INDEX_NAME': JSON.stringify(process.env.ALGOLIA_INDEX_NAME),
+        'process.env.ALUCIO_FACEBOOK_APP_ID': JSON.stringify(process.env.ALUCIO_FACEBOOK_APP_ID),
+
+      }),
+    ],
   })
 }
 
@@ -119,7 +129,7 @@ exports.onCreateBabelConfig = ({ actions }) => {
     options: {
       alias: {
         "_src": "./src",
-        "_content": "./content",
+        "_contents": "./contents",
         "_config": "./config",
       }
     }

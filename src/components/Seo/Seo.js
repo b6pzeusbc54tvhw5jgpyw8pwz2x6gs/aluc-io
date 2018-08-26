@@ -2,10 +2,10 @@ import React from "react"
 import PropTypes from "prop-types"
 import Helmet from "react-helmet"
 
-import config from '_config/meta'
+import avatar from "_contents/pages/1--about/newavatar.jpg"
 
 const Seo = props => {
-  const { data } = props
+  const { data, config } = props
   const { facebook } = config
   const postTitle = ((data || {}).frontmatter || {}).title
   const postDescription = ((data || {}).frontmatter || {}).description
@@ -16,8 +16,6 @@ const Seo = props => {
   const description = postDescription ? postDescription : config.siteDescription
   const siteImage = postCover ? postCover : config.siteImage
   const url = config.siteUrl + config.pathPrefix + postSlug
-
-  const image = (((siteImage || {}).childImageSharp || {}).resize || {}).url || config.siteUrl + "/images/newavatar.jpg"
 
   return (
     <Helmet
@@ -33,7 +31,7 @@ const Seo = props => {
       <meta property="og:url" content={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={avatar} />
       <meta property="og:type" content="website" />
       <meta property="fb:app_id" content={facebook.appId} />
       {/* Twitter Card tags */}
@@ -49,6 +47,7 @@ const Seo = props => {
 
 Seo.propTypes = {
   data: PropTypes.object,
+  config: PropTypes.object.isRequired,
 }
 
 export default Seo

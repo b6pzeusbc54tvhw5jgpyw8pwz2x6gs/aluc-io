@@ -7,7 +7,7 @@ import { withRouter } from "react-router"
 import cx from "classnames"
 
 import { isWideScreenSelector } from '_src/selectors/layout'
-import avatar from "../../images/newavatar.jpg"
+import avatar from "_contents/pages/1--about/newavatar.jpg"
 import theme from "../../theme/theme.yaml"
 
 const LayoutHeader = props => {
