@@ -2,7 +2,9 @@
 title: $ whoami
 ---
 
+- 유 병화 입니다
 - I'm Alfred UC
+- alfreduc is my nickname
 - http://aluc.io is my space
 
 ![avatar](./newavatar.jpg)
