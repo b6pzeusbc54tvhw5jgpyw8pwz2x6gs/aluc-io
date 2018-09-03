@@ -7,106 +7,186 @@ published: true
 
 [Serverless Framework][serverless_framework] 는 AWS Lambda 와 API Gateway 와
 같은 **serverless architecture** 들을 설정 코드를 통해 쉽게 배포하고 관리 할 수
-있는 툴이다. 평소 API Gateway 와 Lambda 를 Web Console 을 통해 접해봤거나Hl
+있는 툴이다. 평소 API Gateway 와 Lambda 를 Web Console 을 통해 접해봤거나
 혹은 어떤 서비스인지 대충 알고만 있어도 serverless 를 시작하기에 무리가 없다.
 
-serverless 라는 용어는 이 포스트에서 다룰 `serverless` 라는 툴을 의미하기도 하며
-AWS Lambda 와 같은 EC2 인스턴스 없이 구동되는 서비스 또는 서비스 아키텍쳐를
-의미하기도 한다.
+serverless 라는 용어는 [Serverless Framework][serverless_framework]` 라는 툴
+의미하기도 하며 AWS Lambda 와 같은 EC2 인스턴스 없이 구동되는 서비스 또는 서비스
+아키텍쳐를 의미하기도 한다. 포스트에서는 전자로 많이 언급한다.
 
-# serverless 설치 (feat. npx)
-serverless 는 nodejs 로 개발되었다. npm 이나 yarn 의 global 옵션으로 설치 할 수
-있는데 요즘엔 global 옵션 설정보다 `npx` 를 사용하는 것이 더 좋아보인다. 새로운
-프로젝트 디렉토리를 만들고 시작해보자.
+# serverless 설치 및 프로젝트 초기화 (feat. npx)
+serverless 는 nodejs 로 개발되었다. npm 이나 yarn 을 사용하여 global 영역에
+[serverless package][sls_package] 를 설치하여 시작하는 것이 일반적이지만 global
+영역을 더럽히는 것을 원하지 않는다면 [npx][npx] 를 사용해도 좋다. 이 포스트에서는
+`npx` 를 사용하도록 하겠다. `npx` 를 npm `5.2.0` 이상 버전에 탑재되어 있다.
+
+npx 를 사용하면 global 영역에 패키지를 설치 하지 않고 바로 serverless
+실행파일을 사용 할 수 있다. 아래 명령어를 통해 프로젝트 생성하자:
 
 ```sh
-$ mkdir my-serverless-project
-$ cd $_
-$ yarn init
-$ yarn add serverless
-$ npx serverless -v
+$ npx serverless create --template aws-nodejs --path sls-hello-world
+$ cd sls-hello-world
+$ ls -l
+total 16
+-rw-r--r--  1 ssohjiro  staff   414 Sep  3 20:40 handler.js
+-rw-r--r--  1 ssohjiro  staff  2892 Sep  3 20:40 serverless.yml
 ```
 
-`npx <command>` 는 nodejs 모듈 로드 메카니즘에 따라 `node_modules` 아래 `.bin`
-디렉토리에 있는 실행가능한 파일을 찾아 실행해준다. `global` 설정을 사용해서
-serverless 를 설치하면 서로 다른 serverless 버전을 사용하는 프로젝트를 동시에
-진행하기 곤란하지만 `npx` 를 사용하여 `global` 에 serverless 를 사용하지 않고
-프로젝트 디렉토리 밑 `node_modules` 를 사용하므로 이런 문제를 잘 해결해준다.
+현재 디렉토리 아래 `sls-hello-world` 란 디렉토리가 생성되면서 기본 serverless
+핵심 설정파일인 `serverless.yml` 과 기본 `handler.js` 가 생성된다.
 
-`node_modules` 에 해당 실행가능한 파일이 없다면 그때 npm registry 에서 받아온 후
-실행시켜주는데, `docker run` 명령어로 이미지를 `pull` 받은 후 `run` 시켜주는
-것과 비슷하다. 따라서 이 post 에서도 `npx` 를 사용하겠다.
+`npx <command>` 를 실행하면 아래 우선순위대로 패키지를 찾아 실행시킨다.
+1. 현재 디렉토리 아래에 있는 `node_modules/bin` 디렉토리에서 패키지를 찾는다.
+1. global 영역의 `bin` 디렉토리에서 패키지를 찾는다 (예: `~/.nvm/versions/node/v8.9.4/bin`)
+1. 상위 디렉토리의 `node_modules/bin` 안의 패키지를 찾는다.
+1. 패키지를 찾지 못하면 인터넷(npm registry)에서 받아온다.
+
+`global` 영역에 serverless 를 설치하면 서로 다른 serverless 버전을 사용하는
+프로젝트를 동시에 진행하기 곤란하지만 `npx` 를 사용하면 각각의 프로젝트
+디렉토리 밑 `node_modules` 를 사용 할 수 있다. 그럼 프로젝트 디렉토리 밑에
+serverless 를 설치 하자.
+
+```sh
+$ yarn init
+yarn init v1.7.0
+question name (sls-hello-world):
+question version (1.0.0):
+question description:
+question entry point (index.js):
+question repository url:
+question author:
+question license (MIT):
+question private:
+success Saved package.json
+✨  Done in 1.57s.
+
+$ yarn add serverless
+
+$ npx serverless -v
+1.30.3
+
+$ npx sls -v
+1.30.3
+```
+
+`create` 명령어를 할 땐 `serverless` 를 인터넷에서 받아 실행시키느라 느렸지만
+이번엔 `node_modules` 아래에 있는 것을 실행시키므로 바로 바로 실행이 된다.
+`npx serverless` 명령어는 계속 타이핑 하기에 길기 때문에 앞으론 shortcut 인 `sls`
+를 사용하자.
+
+## git init
+`.gitignore` 파일을 아래와 같이 작성 한 뒤 프로젝트를 git 으로 관리하자.
+그래야 변경되는 부분에 집중 하며 연습을 할 수 있다.
+
+```
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# yarn
+yarn.lock
+yarn-*.log
+```
+
+현재 형상을 커밋하자
+```
+$ git init
+$ git add .
+$ git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   .gitignore
+	new file:   handler.js
+	new file:   package.json
+	new file:   serverless.yml
+
+$ git commit -m "initial commit"
+[master (root-commit) bcf36cf] initial commit
+ 4 files changed, 138 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 handler.js
+ create mode 100644 package.json
+ create mode 100644 serverless.yml
+```
 
 # hello world
-serverless 는 기본적으로 `serverless.yml` 이름의 설정 파일로부터 시작할 수 있다.
+`aws-nodejs` 템플릿으로 프로젝트를 생성했기 때문에 `handler.js` 안에 기본적인
+`hello` 핸들러 하나가 작성되어 있을 것이다.
 
-`serverless.yml`
-```sh
-service: my-first-serverless-service
-frameworkVersion: ">=1.28.0"
+`serverless.yml` 쪽을 살펴보자. 나중에 참고하며 작성하기 좋게 여러 설정들이
+주석처리 되어 있다. 주석을 모두 걷어내면 아래와 같은 설정이 보인다:
+
+```yml
+service: sls-hello-world
 
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
-  region: ap-northeast-2
-
 functions:
   hello:
     handler: handler.hello
 ```
 
-`us-east-1` 리전에 `hello` 란 이름의 Lambda function 을 만든다는 의미이다.
-`handler` 를 주목하자. `handler.hello` 값은 `handler.js` 파일의 `hello` 란
-이름의 export 된 함수를 실행하겠다는 의미이다. 아래와 같이 파일을 작성하자.
+`yaml` 은 인덴테이션에 민감한 문법이다. 휴먼 리더블한 yaml 로 설정을 작성하고
+실행될때는 json 으로 변환되어서 실행되는데 의도대로 yaml 이 작성되었는지
+확인하고 싶을땐 `js-yaml` 을 사용하자:
 
-```js
-// handler.js
-module.exports.hello = (event, context, callback) => {
-  callback(null, { statusCode: 200, body: 'Hello serverless!!' })
+```sh
+$ yarn add js-yaml --dev
+$ npx js-yaml serverless.yml
+{
+  "service": "sls-hello-world",
+  "provider": {
+    "name": "aws",
+    "runtime": "nodejs8.10"
+  },
+  "functions": {
+    "hello": {
+      "handler": "handler.hello"
+    }
+  }
 }
 ```
 
-AWS Lambda 는 handler 함수를 트리거 할 때, callback 이라는 함수를 3번째 인자로
-넣어준다. 앞에 event, context 객체는 나중에 다루기로 하고 callback 에 대해서만
-간단하게 알자보자.  Lambda 함수 실행이 종료되었다는 것을 알리고 동시에 callback
-을 통해 함수의 결과값을 반환할 수 있다. 첫번째 인자는 error 가 `Error` 객체를
-하는 용도이고, 에러가 없다면 `null` 과 함께 정상 반환 값을 2번째 인자로 넣어주면
-된다.  return 값이 아닌 callback 의 인자로 결과값을 반환받기 때문에 javascript
-에서 주로 사용하는 비동기 프로세스를 쉽게 처리 할 수 있다.
+`functions` property 는 Lambda function 하나를 의미한다. hello 란 id 의 Lambda
+function 을 생성하고 handler 로 `handler.js` 파일이 `hello` 란 이름으로 export
+해주는 함수를 사용한다는 의미이다. `hello` 란 id 는 serverless 에서 관리되는 id
+이며 실제 Lambda function 에 배포되는 id 는 service name, stage, id 의 조합으로
+생성된다. AWS API 를 사용해 배포하기 때문에 AWS credential 이 필요하다.
+`.envrc` 파일을 작성 한 뒤 배포해보자.
 
-## first deploy
-자 이제 `handler.js` 파일과 `serverless.yml` 파일이 준비되었으니 Lambda function
-을 생성해보자. 생성전 먼저 serverless 가 AWS API 를 사용할 수 있는 권한이 있어야
-하는데, 권한있는 IAM 계정의 `ACCESS_KEY` 를 .envrc 파일에 아래와 같이 설정하자.
-
-```sh
+```
 # .envrc
-export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXXXXX
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export AWS_ACCESS_KEY_ID=AKSSSSSSSSSSSSSSSSRA
+export AWS_SECRET_ACCESS_KEY=kvxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxzZ
 ```
 
-추가로 `.envrc` 파일이 형상관리되지 않도록 간단하게 `.gitignore` 에 추가하자.
-다른 경로인 `.serverless/` 경로는 serverless 배포 등의 동작시 자동으로 생성되는
-디렉토리이므로 역시 형상관리에서 제외하자.
+보통 `AWS_DEFAULT_REGION` 환경변수가 사용되는데 `serverless` 에서는
+`serverless.yml` 안의 `provider.region` property 가 사용된다는 사실을 주의!
+
+시크릿 정보가 형상관리에 추가되지 않도록 `.gitignore` 에 추가하는 것도 잊지말자. 
+배포하기 전에 커밋을 하나 추가 하자.
 
 ```sh
-# .gitignore
-.serverless/
-.envrc
-
-node_modules/
-yarn.lock
+$ git add .
+$ git commit -m "update .gitignore, remove comment in serverless.yml, add js-yaml"
+[master 3d84bbe] update .gitignore, remove comment in serverless.yml, add js-yaml
+ 3 files changed, 12 insertions(+), 104 deletions(-)
+ rewrite serverless.yml (96%)
 ```
 
-자 이제 `source` 명령어를 통해 `.envrc` 파일의 내용을 환경변수로 셋팅해준
-`deploy` 명령어를 통해 첫 배포를 해볼 것 이다. `serverless` 를 줄여 `sls` 로
-사용할 수 있는데, ~~타이핑치기 힘들어서~~앞으로는 `sls` 로 사용하겠다.
-
-
-```sh
+첫 배포:
+```
 $ source .envrc
-$ npx sls deploy --verbose
+$ npx sls deploy
 Serverless: Packaging service...
 Serverless: Excluding development dependencies...
 Serverless: Creating Stack...
@@ -115,26 +195,26 @@ Serverless: Checking Stack create progress...
 Serverless: Stack create finished...
 Serverless: Uploading CloudFormation file to S3...
 Serverless: Uploading artifacts...
-Serverless: Uploading service .zip file to S3 (17.19 MB)...
+Serverless: Uploading service .zip file to S3 (17.34 MB)...
 Serverless: Validating template...
 Serverless: Updating Stack...
 Serverless: Checking Stack update progress...
 ...............
 Serverless: Stack update finished...
 Service Information
-service: my-first-serverless-service
+service: sls-hello-world
 stage: dev
-region: ap-northeast-2
-stack: my-first-serverless-service-dev
+region: us-east-1
+stack: sls-hello-world-dev
 api keys:
   None
 endpoints:
   None
 functions:
-  hello: my-first-serverless-service-dev-hello
+  hello: sls-hello-world-dev-hello
 ```
 
-deploy 명령어는 다음과 같이 동작한다.
+`deploy` 명령어는 내부적으로 다음과 같이 동작한다.
 1. `serverless.yml` 설정 파일로 부터 AWS CloudFormation 템플릿 파일을 생성한다.
 2. 아직 CloudFormation Stack 이 생성되지 않았을 경우 코드의 압축파일이 저장될 s3
    bucket 과 함께 Stack 을 생한다.
@@ -148,36 +228,114 @@ deploy 명령어는 다음과 같이 동작한다.
 8. 새로운 CloudFormation 템플릿으로 Stack 을 업데이트 한다.
 9. 각각의 배포는 각 Lambda Function 을 새로운 버전으로 발행한다.
 
-잘 배포 되었는지 AWS Web Console 을 통해 확인해보자.
+`serverless.yml` 에 `provider.region` 값을 명시 하지 않았으므로 디폴트 리전인
+`us-east-1` 에 `sls-hello-world-dev-hello` 이름의 Lambda function 이
+배포되었다. [AWS Web Console][webconsole_labmda] 로 접속하여 확인해도 좋다.
 
 ![first-deploy](./check-first-deploy.png)
 
-
-## invoke
-`serverless invoke`
-명령을 통해 배포한 Lambda function 을 실행해 볼 수 있는데, 아래 명령어로
-배포한 hello handler 가 잘 동작하는지 트리거 시켜보고 callback 함수의 2번째
-인자로 넘겨준 내용이 output 으로 잘 찍히는 것을 확인하자.
-
+잘 배포되었는지 `invoke` 명령을 사용해 Lambda function 을 트리거해보자:
 ```
-$ npx sls invoke -f hello
+$ npx sls invoke --function hello
 {
     "statusCode": 200,
-    "body": "Hello serverless!!"
+    "body": "{\"message\":\"Go Serverless v1.0! Your function executed successfully!\",\"input\":{}}"
 }
 ```
 
-## package 설정
-로그를 보면 17MB 정도의 파일을 올리는 것을 볼 수 있다. serverless 는 handler.js
-코드 안에서 어떤 라이브러리를 사용하고 어떤 코드와 종속성을 가지는지 알 수 없기
-때문에 기본설정으로 `node_modules/` 디렉토리 포함 현재 디렉토리의 모든 파일을
-압축해서 올리고 있는 것인데, 이는 현재 `hello` Lambda function 을 수행하는데
-불필요하다.  `serverless.yml` 파일에 `package` 설정을 추가하여 불필요한 파일들이
-package 되어 업로드 되는 문제를 해결해보자.
+`handler.js` 파일의 `hello` 함수가 리턴해주는 내용이 잘 출력됨을 볼 수 있다.
+아래와 같이 `dynamicHello` 란 Lambda functino 을 하나 더 작성해 보자.
+
+```js
+let count = 1
+module.exports.dynamicHello = (event, context, callback) => {
+
+  console.log(event)
+  console.log(context)
+
+  const response = {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8;",
+    },
+    body: `
+      <h1>hello ${count++}th 방문자님!!</h1>
+      <h3>context.awsRequestId: ${context.awsRequestId}</h3>
+      <h3>context.logStreamName: ${context.logStreamName}</h3>
+    `,
+  }
+  callback(null, response)
+}
+```
+
+`serverless.yml` 에는 아래와 같이 `dynamicHello` function 을 추가하고 `handler`
+를 연결시켜주자.
 
 ```diff
- service: my-first-serverless-service
- frameworkVersion: ">=1.28.0"
+ functions:
+   hello:
+     handler: handler.hello
++  dynamicHello:
++    handler: handler.dynamicHello
+```
+
+템플릿에 기본 작성되어 있던 async function 은 이번에 다루지 않는다. async
+function 은 함수안에서 비동기 동작을 await 를 사용하여 처리 하겠다는 것 인데
+`serverless` 설명에 집중하기 위해 `async` 를 사용하지 않는 `dynamicHello` 와
+같은 기존 함수 스타일로 설명하겠다.
+
+AWS Lambda 는 handler 함수를 트리거 할 때, callback 이라는 함수를 3번째 인자로
+넣어준다. callback 을 호출한다는 것은 Lambda function 이 종료되었다는 것을
+의미하고 callback 함수 호출시 첫번째, 두번째 인자를 통해 응답을 줄 수 있다.
+첫번째 인자는 error 발생시 `Error` 객체를 응답하는 용도이고, 에러가 없다면
+`null` 과 함께 정상 반환 값을 2번째 인자로 넣어주면 된다. return 값이 아닌
+callback 의 인자로 결과값을 반환받기 때문에 javascript 에서 주로 사용하는
+비동기 프로세스를 쉽게 처리 할 수 있다.
+
+## package 설정
+첫번째 `deploy` 때 로그를 보면 17MB 정도의 파일을 올리는 것을 볼 수 있다.
+serverless 는 기본적으로 현재 디렉토리의 모든 파일을 압축해서 s3 로 업로드
+시킨다. `node_modules/` 디렉토리도 포함 되기 때문에 Lambda function
+실행환경에서 불필요한 파일도 함께 올라가며, 올라가서는 안되는 `.envrc` 와 같은
+시크릿 정보도 함께 올라간다.
+
+어디에 올라가는 것일까? `info` 명령어로 확인해보자
+
+```sh
+$ npx sls info --verbose
+Service Information
+service: sls-hello-world
+stage: dev
+region: us-east-1
+stack: sls-hello-world-dev
+api keys:
+  None
+endpoints:
+  None
+functions:
+  hello: sls-hello-world-dev-hello
+
+Stack Outputs
+HelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:539425821792:function:sls-hello-world-dev-hello:1
+ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-p6b4rmgo2fy
+```
+
+`ServerlessDeploymentBucketName` 의 값이 바로 배포를 위해 사용하는 S3
+버킷이름인데, 따로 설정해주시 않으면 임의로 설정되며, 나중에 배포가 잘 안되어
+디버깅 할 때 이 버킷을 방문하게 될 것이다. 심심하면 지금 S3 해당 버킷에
+방문하여 업로드된 `zip` 파일을 내려받아 확인해도 좋다.
+
+`serverlesss.yml` 에 `package` 설정을 추가하여 불필요한 파일들이 package 되어
+업로드 되는 문제를 해결하자.
+
+```diff
+$ git diff
+diff --git a/serverless.yml b/serverless.yml
+index 0677ad6..739d59b 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -1,5 +1,11 @@
+ service: sls-hello-world
 
 +package:
 +  exclude:
@@ -185,107 +343,128 @@ package 되어 업로드 되는 문제를 해결해보자.
 +  include:
 +    - handler.js
 +
+ provider:
+   name: aws
+   runtime: nodejs8.10
 ```
 
 모든 파일을 제외한 뒤 handler.js 파일만 업로드 하는 설정이다. 다시 한번
-배포해보자.
+배포해보자. `--verbose` 옵션을 추가하여 AWS 어떤 자원이 변경되는 것인지 확인 할
+수 있다.
 
 ```sh
-$ npx sls deploy
-...skip...
+$ npx sls deploy --verbose
+Serverless: Packaging service...
+Serverless: Excluding development dependencies...
+Serverless: Uploading CloudFormation file to S3...
 Serverless: Uploading artifacts...
-Serverless: Uploading service .zip file to S3 (253 B)...
+Serverless: Uploading service .zip file to S3 (615 B)...
 Serverless: Validating template...
-...skip...
-```
-
-이제 253B, 딱 필요한 파일만 upload 되는 것을 볼 수 있다. `package` 설정을 통해
-업로드 되는 코드의 용량이 줄어들 뿐만 아니라 무심코 API KEY 같은 파일이 s3 로
-업로드 되는 실수 등도 방지 할 수 있다.  내부적으로 serverless 는 Lambda function
-이 실행할 코드와 Lambda function 배포를 위한 cloudformation 설정 파일을 s3
-버킷을 임의로 생성하여 사용하는데 아래 명령어를 통해 어떤 deploy 버킷의 이름을
-확인 할 수 있다.
-
-```sh
-$ npx sls info --verbose
+Serverless: Updating Stack...
+Serverless: Checking Stack update progress...
+CloudFormation - UPDATE_IN_PROGRESS - AWS::CloudFormation::Stack - sls-hello-world-dev
+CloudFormation - UPDATE_IN_PROGRESS - AWS::Lambda::Function - HelloLambdaFunction
+CloudFormation - UPDATE_COMPLETE - AWS::Lambda::Function - HelloLambdaFunction
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
+CloudFormation - CREATE_COMPLETE - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
+CloudFormation - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS - AWS::CloudFormation::Stack - sls-hello-world-dev
+CloudFormation - DELETE_SKIPPED - AWS::Lambda::Version - HelloLambdaVersion0Ft40rQFUd8MDtfTPN6KHBOUQjNVLapx8ZhWdnE1NM
+CloudFormation - UPDATE_COMPLETE - AWS::CloudFormation::Stack - sls-hello-world-dev
+Serverless: Stack update finished...
 Service Information
-service: my-first-serverless-service
+service: sls-hello-world
 stage: dev
-region: ap-northeast-2
-stack: my-first-serverless-service-dev
+region: us-east-1
+stack: sls-hello-world-dev
 api keys:
   None
 endpoints:
   None
 functions:
-  hello: my-first-serverless-service-dev-hello
+  hello: sls-hello-world-dev-hello
 
 Stack Outputs
-HelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-northeast-2:539425821792:function:my-first-serverless-service-dev-hello:5
-ServerlessDeploymentBucketName: my-first-serverless-serv-serverlessdeploymentbuck-k11zvp877tpm
+HelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:539425821792:function:sls-hello-world-dev-hello:3
+ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-p6b4rmgo2fy
 ```
 
-`ServerlessDeploymentBucketName` 의 값이 바로 배포를 위해 사용하는 버킷이름인데,
-따로 설정해주시 않으면 임의로 설정되며, 나중에 배포가 잘 안되어 디버깅 할 때 이
-버킷을 방문하게 될 것이다. 심심하면 지금 S3 해당 버킷에 방문하여 앞서 배포한
-2건의 차이를 확인해보아도 좋다.
+이제 딱 615Byte 필요한 파일만 upload 되는 것을 볼 수 있다. `package` 설정을
+통해 업로드 되는 코드의 용량이 줄어들 뿐만 아니라 무심코 API KEY 같은 파일이 s3
+로 업로드 되는 실수 등도 방지 할 수 있다. `ServerlessDeploymentBucketName` S3
+버킷에 방문하여 업로드된 2건의 차이를 확인해보아도 좋다.
 
 ## logging
-디버깅을 위해서라도 로깅은 반드시 필요하다.  `handler.js` 파일에
-`console.log` 코드를 삽입 한 뒤 확인해보자.
 
-```diff
-// handler.js
-module.exports.hello = (event, context, callback) => {
-+ console.log("hello!!!")
-  callback(null, { statusCode: 200, body: 'Hello serverless!!' })
-}
-```
+`dynamicHello` 핸들러에는 디버깅을 위해 `console.log` 를 사용했다.  `invoke` 에
+`--log` 옵션을 붙이면 응답 값 뿐만 아니라 로그도 확인 할 수 있다.
 
 ```sh
-$ npx sls deploy
-$ npx sls invoke -f hello --log
+$ npx sls invoke --function dynamicHello --log
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "text/html; charset=utf-8;"
+    },
+    "body": "\n      <h1>hello 1th 방문자님!!</h1>\n      <h3>context.awsRequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1</h3>\n      <h3>context.logStreamName: 2018/09/03/[$LATEST]406d33b8c803452fbf0097854516b464</h3>\n    "
+}
+--------------------------------------------------------------------
+START RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1 Version: $LATEST
+2018-09-03 22:53:20.634 (+09:00)	b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1	{}
+2018-09-03 22:53:20.635 (+09:00)	b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1	{ callbackWaitsForEmptyEventLoop: [Getter/Setter],
+  done: [Function: done],
+  succeed: [Function: succeed],
+  fail: [Function: fail],
+  logGroupName: '/aws/lambda/sls-hello-world-dev-dynamicHello',
+  logStreamName: '2018/09/03/[$LATEST]406d33b8c803452fbf0097854516b464',
+  functionName: 'sls-hello-world-dev-dynamicHello',
+  memoryLimitInMB: '1024',
+  functionVersion: '$LATEST',
+  getRemainingTimeInMillis: [Function: getRemainingTimeInMillis],
+  invokeid: 'b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1',
+  awsRequestId: 'b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1',
+  invokedFunctionArn: 'arn:aws:lambda:us-east-1:539425821792:function:sls-hello-world-dev-dynamicHello' }
+END RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1
+REPORT RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1	Duration: 5.34 ms	Billed Duration: 100 ms 	Memory Size: 1024 MB	Max Memory Used: 47 MB
 ```
 
-`--log` 옵션을 붙여야만 로그가 나온다. 뿐만 아니라 **serverless** 가 기본으로
-LogGroup 을 설정해줘서 AWS CloudWatch 의 Logs 메뉴에서
-`/aws/lambda/my-first-serverless-service-dev-hello` 와 같은 로그 그룹을 찾을 수
-있고 클릭해서 들어가면 Lambda function 의 트리거와 종료, 그리고 "hello!!!" 로그
-등을 확인 할 수 있을 것이다.
+`invoke` 명령으로 뿐만 뿐만 아니라 **serverless** 가 기본으로 LogGroup 을
+설정해줘서 [AWS Web Console CloudWatch][webconsole_cloudwatch] 의 Logs 메뉴에서
+`/aws/lambda/sls-hello-world-dev-dynamicHello` 와 같은 로그 그룹을 찾을 수 있고
+클릭해서 들어가면 Lambda function 의 트리거 시작과 종료, 그리고 console.log 로
+찍은 로그 등을 확인 할 수 있다.
 
 # AWS 자원 사용하기 - S3
-Labmda 로 s3 특정 버킷에 접근하기 위해 `serverless.yml` 파일 `provider` 설정
-아래 `iamRoleStatements` 설정을 아래와 같이 추가해보자.
+Lambda function 에서 s3 버킷에 접근하기 위해 `serverless.yml` 파일 `provider`
+설정 아래 `iamRoleStatements` 설정을 아래와 같이 추가해보자.
 
 ```diff
  provider:
    name: aws
    runtime: nodejs8.10
--  stage: dev
-+  stage: ${env:SLS_STAGE}
-   region: ap-northeast-2
 +  iamRoleStatements:
 +    - Effect: Allow
 +      Action:
-+        - s3:*
++        - s3:GetObject
++        - s3:PutObject
++        - s3:ListObjects
 +      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 ```
 
 ## serverless.yml 설정에 환경변수 사용하기
-s3 버킷 이름등을 하드코딩하면 다른 환경에서 사용하거나 오픈소스로 오픈할 때
-사용하는 사람은 코드를 수정해야만 할 것이다. 환경 마다 달라질 수 있는 부분은
-환경변수로 따로 빼는 것이 좋다. 이런 환경변수를 `.envrc` 파일에 추가하자.
+`${env:SLS_BUCKET_NAME}` 부분을 주목하자. s3 버킷 이름 등을 하드코딩하면 다른
+환경에서 사용하거나 오픈소스로 오픈할 때 사용하는 사람은 코드를 수정해야만 할
+것이다. 환경마다 달라질 수 있는 부분은 환경변수로 따로 빼는 것이 좋다. 이런
+환경변수를 `.envrc` 파일에 추가하여 `deploy` 하기전 현재 쉘에 셋팅해주면
+`${env:SOME_VAR}` 와 같은 문법으로 사용 할 수 있다.
 
-```sh
+```diff
 # .envrc
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXXXXX
 export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-+export SLS_STAGE=dev
-+export SLS_BUCKET_NAME=my-bucket-for-sls-1123
-```
 
-다른 프로그램들과 환경변수 충돌을 방지하기 위해 `SLS_` 를 프리픽스로 사용했다.
-`stage` 부분도 환경변수로 함께 뺐다.
++export SLS_BUCKET_NAME=sls-hello-world-91283712
+```
 
 ## s3 bucket access
 nodejs 라이브러리인 [aws-sdk][aws_sdk_js] 를 사용하여 s3 버킷의 파일 목록을
@@ -298,14 +477,13 @@ $ aws s3 cp image2.jpg s3://$SLS_BUCKET_NAME/
 ```
 
 ## Labmda Function 에 환경변수 사용하기
-`handler.js` 에 `s3ObjectList` 라는 named export 함수를 아래와 같이 하나 더
-만들자.
+`handler.js` 에 `getS3Object` 라는 함수를 아래와 같이 생성하자:
 
 ```diff
-+module.exports.s3ObjectList = (event, context, callback) => {
-+  const s3 = new AWS.S3({apiVersion: '2006-03-01'});
-+  const params = { Bucket: process.env.SLS_BUCKET_NAME, MaxKeys: 10 };
-+  s3.listObjects(params, (err,data) => {
++module.exports.getS3Object = (event, context, callback) => {
++  const s3 = new AWS.S3()
++  const params = { Bucket: process.env.SLS_BUCKET_NAME, Key: event.path }
++  s3.getObject(params, (err,data) => {
 +    if( err ) {
 +      callback(err)
 +      return
@@ -315,11 +493,10 @@ $ aws s3 cp image2.jpg s3://$SLS_BUCKET_NAME/
 +}
 ```
 
-`process.env.SLS_BUCKET_NAME` 을 주목하자. 이 코드는 로컬이 아닌 AWS Lambda
-Function 으로 실행되는 코드이다. 아무리 `source .envrc` 로 로컬에 환경 변수
-셋팅을 해놓았을지라도 Lambda Function 실행환경에서의 환경변수가 셋팅되지는
-않는다. `environment` 설정을 통해서 Lambda Function 실행환경의 환경 변수를
-셋팅 할 수 있다.
+`process.env.SLS_BUCKET_NAME` 을 주목하자. `source .envrc` 로 로컬 쉘에
+환경변수 셋팅을 해놓았을지라도 Lambda function 실행환경에서 `process.env` 로
+접근 할 수 있는 환경변수가 셋팅되지는 않는다. `serverless.yml` 에 `environment`
+설정을 통해서 Lambda Function 실행환경의 환경변수를 셋팅 할 수 있다.
 
 ```diff
  provider:
@@ -663,7 +840,10 @@ AWS SNS 를 통해 알림을 받도록 추가해보자.
 [serverless]: https://serverless.com/
 [serverless_framework]: https://serverless.com/framework/
 [aws_sdk_js]: https://github.com/aws/aws-sdk-js
-
+[npx]: https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner
+[sls_package]: https://www.npmjs.com/package/serverless
+[webconsole_labmda]: https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions
+[webconsole_cloudwatch]: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:
 https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
 https://github.com/serverless/examples
 https://github.com/mgi166/serverless-image-resizer/blob/master/src/imageResizer.js
