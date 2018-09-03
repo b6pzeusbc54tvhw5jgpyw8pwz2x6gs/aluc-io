@@ -29,7 +29,7 @@ class SimplePostList extends React.Component {
         <style jsx>{`
           .box {
             transform: translate3d(0, 0, 0);
-            width: 640px;
+            width: 100%;
             background-color: ${showLayout ? "rgba(0, 21, 128, 0.17)" : theme.navigator.colors.background};
             margin: 10px auto 0 auto;
           }

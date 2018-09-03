@@ -52,6 +52,7 @@ const ToolBox = (props) => {
         .box {
           position: fixed;
           right: 4px;
+          z-index: 10;
         }
         .iconBox {
           transition: all .5s;

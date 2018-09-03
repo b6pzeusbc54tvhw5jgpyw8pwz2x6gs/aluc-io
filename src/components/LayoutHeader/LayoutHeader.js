@@ -37,7 +37,7 @@ const LayoutHeader = props => {
         }
 
         .box.listPage {
-          width: 640px;
+          max-width: 640px;
           margin: 10px auto 0 auto;
         }
         @media ${theme.mediaQuery.s} {
@@ -70,6 +70,7 @@ const LayoutHeader = props => {
         }
         .box :global(a) {
           box-shadow: none;
+          display: inline-block;
         }
         .box :global(a:hover) {
           text-decoration: underline;

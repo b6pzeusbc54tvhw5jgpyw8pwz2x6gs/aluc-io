@@ -5,7 +5,7 @@ title: $ whoami
 - 유 병화 입니다
 - I'm Alfred UC
 - alfreduc is my nickname
-- http://aluc.io is my space
+- https://aluc.io is my space
 
 ![avatar](./newavatar.jpg)
 ![avatar](./cutphoto.png)
@@ -101,7 +101,7 @@ title: $ whoami
 [gas]: https://www.samsung.com/global/galaxy/apps/galaxy-apps/
 [watchon]: https://www.iotgadgets.com/2014/04/tizen-samsung-gear-2-watchon-remote-app-now-ready-control-airconditioner/
 [watchon_manual]: https://www.manualslib.com/manual/754923/Samsung-Gear-2.html?page=59#manual
-[devops]: http://aluc.io/slide-docker-devops/
+[devops]: https://aluc.io/slide-docker-devops/
 [graphql]: https://graphql.org/
 [redux]: https://redux.js.org/
 [vault]: https://www.vaultproject.io/
