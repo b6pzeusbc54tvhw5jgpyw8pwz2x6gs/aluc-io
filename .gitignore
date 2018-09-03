@@ -7,3 +7,5 @@ public
 yarn.lock
 
 .envrc
+
+.serverless/

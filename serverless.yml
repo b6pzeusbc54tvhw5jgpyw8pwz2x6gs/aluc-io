@@ -1,0 +1,52 @@
+service: aluc-io
+frameworkVersion: ">=1.28.0"
+
+plugins:
+  - serverless-webpack
+  - serverless-api-cloudfront
+
+custom:
+  apiCloudFront:
+    domain: aluc.io
+    certificate: arn:aws:acm:us-east-1:539425821792:certificate/619fddca-1aaf-458e-9803-20cc9171eeda
+    compress: false
+    logging:
+      bucket: aluc.io.log.s3.amazonaws.com
+      prefix: my-prefix
+    cookies: none
+    headers:
+      - x-api-key
+  webpack:
+    includeModules: false
+    webpackConfig: webpack.config.js
+    packager: yarn
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${env:SLS_STAGE}
+  region: ap-northeast-2
+  timeout: 20
+  environment:
+    SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+    - s3:GetObject
+    Resource:
+    - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
+    - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
+
+functions:
+  index:
+    handler: handler.index
+    events:
+    - http:
+        path: "/"
+        method: get
+    - http:
+        path: "/{depth1}"
+        method: get
+    - http:
+        path: "/{depth1}/{depth2+}"
+        method: get
