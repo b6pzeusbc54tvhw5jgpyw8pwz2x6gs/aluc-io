@@ -209,15 +209,17 @@ service: sls-hello-world
 provider:
   name: aws
   runtime: nodejs8.10
+
 functions:
   hello:
     handler: handler.hello
 ```
 
 [yaml][yaml] 은 인덴테이션에 민감한 문법이다. 휴먼 리더블한 yaml 로 설정을
-작성하고 실행될때는 json 으로 변환되어서 실행되는 방식이 요즘 툴들의 트렌드
-인것 같다. yaml 에 익숙하지 않아 디버깅이 필요한 때, `js-yaml` 을 사용하여
-의도대로 yaml 이 json 으로 잘 변환되는지 확인 할 수 있다.
+작성하고 실행될때는 json 으로 변환되어서 실행되는데, 이러한 방식은 매우
+쾌적하게 설정을 관리 할 수 있게 해준다. yaml 에 익숙하지 않아 디버깅이 필요할
+때, `js-yaml` 을 사용하여 의도대로 yaml 이 json 으로 잘 변환되는지 확인 할 수
+있다.
 
 ```sh
 $ yarn add js-yaml --dev
@@ -236,13 +238,15 @@ $ npx js-yaml serverless.yml
 }
 ```
 
-`functions` property 는 Lambda function 하나를 의미한다. hello 란 id 의 Lambda
-function 을 생성하고 이 Lambda function 이 트리거 될 때 실행되는 코드를
+`functions` property 는 각 Lambda function 1개를 의미한다. `hello` 란 id 의
+Lambda function 을 생성하고 이 Lambda function 이 트리거 될 때 실행되는 코드를
 **핸들러** 라고 하는데 `handler.js` 파일에서 `hello` 란 이름으로 export 되는
 함수를 호출 하겠다는 의미이다. `hello` 란 id 는 serverless 에서 관리되는 id
-이며 실제 Lambda function 에 배포되는 id 는 service name, stage, id 의 조합으로
-생성된다. AWS API 를 사용해 배포하기 때문에 AWS credential 이 필요하다.
-`.envrc` 파일을 작성 한 뒤 배포해보자.
+이며 실제 Lambda function 에 배포되는 function name 은 service name, stage, id
+의 조합으로 생성된다.
+
+배포 할 때 AWS API 를 사용하기 때문에 권한 있는 AWS IAM 의 credential 이
+필요하다. `.envrc` 파일을 작성 하자.
 
 ```
 # .envrc
@@ -250,12 +254,26 @@ export AWS_ACCESS_KEY_ID=AKXXXXXXXXXXXXXXXXRA
 export AWS_SECRET_ACCESS_KEY=kvxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxzZ
 ```
 
-AWS API 사용하는 툴에선 보통 `AWS_DEFAULT_REGION` 환경변수로 어떤 리전을
+AWS API 사용하는 툴에선 보통 `AWS_DEFAULT_REGION` 이란 환경변수로 어떤 리전을
 사용할지 결정하는데 `serverless` 에서는 `serverless.yml` 안의 `provider.region`
 property 가 사용된다는 사실을 주의!
 
 시크릿 정보가 형상관리에 추가되지 않도록 `.gitignore` 에 추가하는 것도 잊지말자. 
-배포하기 전에 커밋을 하나 추가 하자.
+```diff
+$ git diff .gitignore
+diff --git a/.gitignore b/.gitignore
+index 548cc6a..8b15f33 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -10,3 +10,5 @@ jspm_packages
+ # yarn
+ yarn.lock
+ yarn-*.log
++
++.envrc
+```
+
+수정을 마치고 배포하기 전에 커밋을 하나 추가 하자.
 
 ```sh
 $ git add .
@@ -301,7 +319,7 @@ functions:
 1. `serverless.yml` 설정 파일로 부터 AWS CloudFormation 템플릿 파일을 생성한다.
 2. 아직 CloudFormation Stack 이 생성되지 않았을 경우 코드의 압축파일이 저장될 s3
    bucket 과 함께 Stack 을 생한다.
-3. Lambda Function 코드들을 zip 파일로 압축한다.
+3. Lambda function 으로 실행될 코드들을 zip 파일로 압축한다.
 4. 이전 배포된 모든 파일에 대한 hash 를 가져온 뒤 현재 로컬에 있는 파일들의 hash
    와 비교한다.
 5. 만약에 hash 결과가 같으면 배포 프로세스는 종료된다.
@@ -309,11 +327,11 @@ functions:
 7. 모든 IAM Roles, Lambda Functions, Events 그 외 자원들이 AWS CloudFormation
    템플릿에 추가된다.
 8. 새로운 CloudFormation 템플릿으로 Stack 을 업데이트 한다.
-9. 각각의 배포는 각 Lambda Function 을 새로운 버전으로 발행한다.
+9. 각각의 배포는 각 Lambda function 을 새로운 버전으로 발행한다.
 
 `provider.region` 값이 없었으므로 디폴트 리전인 `us-east-1` 에
 `sls-hello-world-dev-hello` 이름의 Lambda function 이 배포되었다. [AWS Web
-Console][webconsole_labmda] 로 접속하여 확인해도 좋다.
+Console][webconsole_lambda] 로 접속하여 확인해도 좋다.
 
 ![first-deploy](./check-first-deploy.png)
 
@@ -329,7 +347,7 @@ $ npx sls invoke --function hello
 `handler.js` 파일의 `hello` 함수가 리턴해주는 내용이 잘 출력됨을 볼 수 있다.
 
 # Lambda Execution Model
-람다의 실행 모델에 대해 간단히 알아보자. `invoke` 명령어를 통해 배포한 Lambda
+람다 실행 모델에 대해 간단히 알아보자. `invoke` 명령어를 통해 배포한 Lambda
 function 을 트리거하게 되면 사용자가 정의한 설정에 따라 코드를 실행 할 수 있는
 임시 실행환경인 **실행 컨텍스트** 가 시작된다. **실행 컨텍스트** 의
 **부트스트래핑** 엔 시간이 다소 소요되며 따라서 첫 호출이나 업데이트 이후, 혹은
@@ -340,18 +358,19 @@ Lambda function 이 실행되면 실행 컨텍스트는 연속되는 호출을 �
 호출이 들어오면 **freeze** 시켜 놓았던 **실행 컨텍스트**가 재사용된다.
 
 **실행 컨텍스트**가 재사용되는 케이스에서는 어느정도의 local storage 를 사용한
-캐싱이나 db connection 등을 미리 해두는 방법으로 성능 최적화를 할 수도 있다.
-코딩 전 [Lambda 실행 모델][lambda_execution_model] 을 반드시 참고하자!
+캐싱이나 기존의 db connection 을 재사용하는 방법 등을 사용하여 최적화를 할 수도
+있다. 코딩 전 [Lambda 실행 모델][lambda_execution_model] 을 참고하자!
 
-> 물론 재사용 되지 않는 경우를 대비해 캐싱에 의존하면 안된다
+> 물론 재사용 되지 않는 경우도 고려하여 코딩해야한다.
 
 ## `dynamicHello` handler 추가
-**실행 컨텍스트** 재사용을 확인해보기 위해 아래와 같이 `dynamicHello` 란 Lambda
-function 을 하나 더 작성해 보자.
+**실행 컨텍스트**가 재사용 되는 것을 확인해보기 위해 아래와 같이
+`dynamicHelloHandler.js` 파일을 작성해보자.
 
 ```js
+// dynamicHelloHandler.js
 let count = 1
-module.exports.dynamicHello = (event, context, callback) => {
+module.exports.hello = (event, context, callback) => {
 
   console.log(event)
   console.log(context)
@@ -364,12 +383,26 @@ module.exports.dynamicHello = (event, context, callback) => {
     body: `
       <h1>hello ${count++}th 방문자님!!</h1>
       <h3>context.awsRequestId: ${context.awsRequestId}</h3>
+      <h3>context.awsRequestId: ${context.awsRequestId}</h3>
       <h3>context.logStreamName: ${context.logStreamName}</h3>
     `,
   }
   callback(null, response)
 }
 ```
+
+템플릿이 업데이트 되지 않았다면, 기본 작성되어 있던 hello 함수는 async function
+으로 되어있을 것이다. [async function][async] 은 javascript 함수안에서 비동기
+동작을 await 를 사용하여 처리 하겠다는 것 인데 Lambda function 에서는 nodejs
+8.10 버전 이상에서 사용 할 수 있다. 포스트에서는 `dynamicHelloHandler.js` 의
+`hello` 함수 처럼 `callback` 을 사용하는 기존 스타일로 설명하겠다.
+
+handler 함수가 호출될 때 AWS Lambda 는 `callback` 이라는 함수를 3번째 인자로
+제공해준다. callback 을 호출한다는 것은 Lambda function 이 종료되었다는 것을
+의미하고 callback 함수 호출시 1번째, 2번째 인자를 통해 응답을 줄 수 있다.
+1번째 인자는 error 발생시 `Error` 객체를 응답하는 용도이고, 에러가 없다면 1번째
+인자로는 `null`, 2번째 인자로 정상 응답 값을 넘겨주면 된다.  javascript 에서는
+비동기 프로세스 처리를 위해 이런 callback 패턴이 흔히 사용된다.
 
 `serverless.yml` 에는 아래와 같이 `dynamicHello` function 을 추가하고 `handler`
 를 연결시켜주자.
@@ -379,31 +412,23 @@ module.exports.dynamicHello = (event, context, callback) => {
    hello:
      handler: handler.hello
 +  dynamicHello:
-+    handler: handler.dynamicHello
++    handler: dynamicHelloHandler.hello
 ```
 
-템플릿에 기본 작성되어 있던 async function 은 이번에 다루지 않는다. async
-function 은 함수안에서 비동기 동작을 await 를 사용하여 처리 하겠다는 것 인데
-`serverless` 설명에 집중하기 위해 `async` 를 사용하지 않는 `dynamicHello` 와
-같은 기존 함수 스타일로 설명하겠다.
-
-AWS Lambda 는 handler 함수를 트리거 할 때, callback 이라는 함수를 3번째 인자로
-넣어준다. callback 을 호출한다는 것은 Lambda function 이 종료되었다는 것을
-의미하고 callback 함수 호출시 첫번째, 두번째 인자를 통해 응답을 줄 수 있다.
-첫번째 인자는 error 발생시 `Error` 객체를 응답하는 용도이고, 에러가 없다면
-`null` 과 함께 정상 반환 값을 2번째 인자로 넣어주면 된다. return 값이 아닌
-callback 의 인자로 결과값을 반환받기 때문에 javascript 에서 주로 사용하는
-비동기 프로세스를 쉽게 처리 할 수 있다.
+여기까지 커밋하자:
+```
+$ git add dynamicHelloHandler.js
+$ git add serverless.yml
+$ git commit -m "add dynamicHello"
+```
 
 ## package 설정
-첫번째 `deploy` 때 로그를 보면 17MB 정도의 파일을 올리는 것을 볼 수 있다.
-serverless 는 기본적으로 현재 디렉토리의 모든 파일을 압축해서 s3 로 업로드
-시킨다. `node_modules/` 디렉토리도 포함 되기 때문에 Lambda function
-실행환경에서 불필요한 파일도 함께 올라가며, 올라가서는 안되는 `.envrc` 와 같은
-시크릿 정보도 함께 올라간다.
-
-어디에 올라가는 것일까? `info` 명령어로 확인해보자
-
+새로운 `dynamicHello` 함수를 배포하기 전, 첫번째 `deploy` 때 로그를 살펴보자.
+17MB 정도의 파일을 올리는 것을 볼 수 있는데 serverless 는 기본적으로 현재
+디렉토리의 모든 파일을 압축해 s3 로 업로드 시키기 때문이다. `node_modules/`
+디렉토리도 포함 되고, Lambda function 실행환경에서 불필요한 파일도 함께
+올라가며, 올라가서는 안되는 `.envrc` 와 같은 시크릿 정보도 함께 올라간다.
+어디에 올라가는 것일까? `info` 명령어로 확인해보자:
 ```sh
 $ npx sls info --verbose
 Service Information
@@ -417,43 +442,45 @@ endpoints:
   None
 functions:
   hello: sls-hello-world-dev-hello
+  dynamicHello: sls-hello-world-dev-dynamicHello
 
 Stack Outputs
 HelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:539425821792:function:sls-hello-world-dev-hello:1
 ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-p6b4rmgo2fy
 ```
 
-`ServerlessDeploymentBucketName` 의 값이 바로 배포를 위해 사용하는 S3
-버킷이름인데, 따로 설정해주시 않으면 임의로 설정되며, 나중에 배포가 잘 안되어
-디버깅 할 때 이 버킷을 방문하게 될 것이다. 심심하면 지금 S3 해당 버킷에
-방문하여 업로드된 `zip` 파일을 내려받아 확인해도 좋다.
+`ServerlessDeploymentBucketName` 의 값이 바로 배포를 위해 사용하는 S3 버킷 이름
+이다. 따로 설정해주시 않으면 임의로 설정되며, 나중에 배포가 잘 안되어 디버깅 할
+때 이 버킷을 방문하게 될 것이다. 지금 해당 버킷에 접속하여 업로드된 `zip` 파일을
+내려받아 확인해도 좋다.
 
-`serverlesss.yml` 에 `package` 설정을 추가하여 불필요한 파일들이 package 되어
-업로드 되는 문제를 해결하자.
+일단 `serverlesss.yml` 에 `package` 설정을 추가하여 불필요한 파일들이 package
+되어 업로드 되는 문제를 해결하자.
 
 ```diff
-$ git diff
+$ git diff serverlesss.yml
 diff --git a/serverless.yml b/serverless.yml
-index 0677ad6..739d59b 100644
+index 3a97e31..35bbb84 100644
 --- a/serverless.yml
 +++ b/serverless.yml
-@@ -1,5 +1,11 @@
- service: sls-hello-world
+@@ -1,5 +1,12 @@
+ service: sls-hello333 # NOTE: update this with your service name
 
 +package:
 +  exclude:
 +    - ./**
 +  include:
 +    - handler.js
++    - dynamicHelloHandler.js
 +
  provider:
    name: aws
    runtime: nodejs8.10
 ```
 
-모든 파일을 제외한 뒤 handler.js 파일만 업로드 하는 설정이다. 다시 한번
-배포해보자. `--verbose` 옵션을 추가하여 AWS 어떤 자원이 변경되는 것인지 확인 할
-수 있다.
+모든 파일을 제외한 뒤 핸들러 파일들만 업로드 하는 설정이다. 다시 한번
+배포해보자. 이번엔 `--verbose` 옵션을 추가하여 AWS 어떤 자원이 변경되는 것인지
+확인 하면서 배포해보자:
 
 ```sh
 $ npx sls deploy --verbose
@@ -461,18 +488,29 @@ Serverless: Packaging service...
 Serverless: Excluding development dependencies...
 Serverless: Uploading CloudFormation file to S3...
 Serverless: Uploading artifacts...
-Serverless: Uploading service .zip file to S3 (615 B)...
+Serverless: Uploading service .zip file to S3 (827 B)...
 Serverless: Validating template...
 Serverless: Updating Stack...
 Serverless: Checking Stack update progress...
 CloudFormation - UPDATE_IN_PROGRESS - AWS::CloudFormation::Stack - sls-hello-world-dev
+CloudFormation - UPDATE_IN_PROGRESS - AWS::IAM::Role - IamRoleLambdaExecution
+CloudFormation - CREATE_IN_PROGRESS - AWS::Logs::LogGroup - DynamicHelloLogGroup
+CloudFormation - CREATE_IN_PROGRESS - AWS::Logs::LogGroup - DynamicHelloLogGroup
+CloudFormation - CREATE_COMPLETE - AWS::Logs::LogGroup - DynamicHelloLogGroup
+CloudFormation - UPDATE_COMPLETE - AWS::IAM::Role - IamRoleLambdaExecution
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Function - DynamicHelloLambdaFunction
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Function - DynamicHelloLambdaFunction
+CloudFormation - CREATE_COMPLETE - AWS::Lambda::Function - DynamicHelloLambdaFunction
 CloudFormation - UPDATE_IN_PROGRESS - AWS::Lambda::Function - HelloLambdaFunction
 CloudFormation - UPDATE_COMPLETE - AWS::Lambda::Function - HelloLambdaFunction
-CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
-CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
-CloudFormation - CREATE_COMPLETE - AWS::Lambda::Version - HelloLambdaVersion4cIXjLzb1P0vZUSNpk4cWj9vXbTYTIRdHhNNHQaXOf4
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - DynamicHelloLambdaVersionnOuATVmieltlZdOnqR3DSXvkVXUK1IWvYRYKODrew
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersionKc0KtAISSGf81l8cTLEUyEI1EvplbR2SlEqYqfPFJ1o
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - DynamicHelloLambdaVersionnOuATVmieltlZdOnqR3DSXvkVXUK1IWvYRYKODrew
+CloudFormation - CREATE_IN_PROGRESS - AWS::Lambda::Version - HelloLambdaVersionKc0KtAISSGf81l8cTLEUyEI1EvplbR2SlEqYqfPFJ1o
+CloudFormation - CREATE_COMPLETE - AWS::Lambda::Version - DynamicHelloLambdaVersionnOuATVmieltlZdOnqR3DSXvkVXUK1IWvYRYKODrew
+CloudFormation - CREATE_COMPLETE - AWS::Lambda::Version - HelloLambdaVersionKc0KtAISSGf81l8cTLEUyEI1EvplbR2SlEqYqfPFJ1o
 CloudFormation - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS - AWS::CloudFormation::Stack - sls-hello-world-dev
-CloudFormation - DELETE_SKIPPED - AWS::Lambda::Version - HelloLambdaVersion0Ft40rQFUd8MDtfTPN6KHBOUQjNVLapx8ZhWdnE1NM
+CloudFormation - DELETE_SKIPPED - AWS::Lambda::Version - HelloLambdaVersiongWX1sqOZC01JQ3WPZbUZpPFUJe4THxKGqQgG6M8b50o
 CloudFormation - UPDATE_COMPLETE - AWS::CloudFormation::Stack - sls-hello-world-dev
 Serverless: Stack update finished...
 Service Information
@@ -486,20 +524,27 @@ endpoints:
   None
 functions:
   hello: sls-hello-world-dev-hello
+  dynamicHello: sls-hello-world-dev-dynamicHello
 
 Stack Outputs
-HelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:539425821792:function:sls-hello-world-dev-hello:3
-ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-p6b4rmgo2fy
+DynamicHelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:666252830126:function:sls-hello-world-dev-dynamicHello:1
+HelloLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:666252830126:function:sls-hello-world-dev-hello:2
+ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-hzgkhdmmg10i
 ```
 
-이제 딱 615Byte 필요한 파일만 upload 되는 것을 볼 수 있다. `package` 설정을
+이제 딱 827Byte, 필요한 파일만 upload 되는 것을 볼 수 있다. `package` 설정을
 통해 업로드 되는 코드의 용량이 줄어들 뿐만 아니라 무심코 API KEY 같은 파일이 s3
 로 업로드 되는 실수 등도 방지 할 수 있다. `ServerlessDeploymentBucketName` S3
-버킷에 방문하여 업로드된 2건의 차이를 확인해보아도 좋다.
+버킷에 방문하여 새롭게 업로드된 zip 파일을 확인하자.
 
-## logging
+이상 없음을 확인 하였으면 커밋 후 계속 진행하자.
+```sh
+$ git add serverless.yml
+$ git commit -m "add package setting"
+```
 
-`dynamicHello` 핸들러에는 디버깅을 위해 `console.log` 를 사용했다.  `invoke` 에
+# logging
+`dynamicHello` 함수에는 디버깅을 위해 `console.log` 를 사용했다. `invoke` 에
 `--log` 옵션을 붙이면 응답 값 뿐만 아니라 로그도 확인 할 수 있다.
 
 ```sh
@@ -509,7 +554,7 @@ $ npx sls invoke --function dynamicHello --log
     "headers": {
         "Content-Type": "text/html; charset=utf-8;"
     },
-    "body": "\n      <h1>hello 1th 방문자님!!</h1>\n      <h3>context.awsRequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1</h3>\n      <h3>context.logStreamName: 2018/09/03/[$LATEST]406d33b8c803452fbf0097854516b464</h3>\n    "
+    "body": "\n      <h1>hello 1th 방문자님!!</h1>\n      <h3>context.logGroupName: /aws/lambda/sls-hello333-dev-dynamicHello</h3>\n      <h3>context.awsRequestId: 573048a6-b034-11e8-9404-bbe59aba3f24</h3>\n      <h3>context.logStreamName: 2018/09/04/[$LATEST]0c3c0ba410494f9e926deaf73c7f4129</h3>\n    "
 }
 --------------------------------------------------------------------
 START RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1 Version: $LATEST
@@ -531,20 +576,134 @@ END RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1
 REPORT RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1	Duration: 5.34 ms	Billed Duration: 100 ms 	Memory Size: 1024 MB	Max Memory Used: 47 MB
 ```
 
-`invoke` 명령으로 뿐만 뿐만 아니라 **serverless** 가 기본으로 LogGroup 을
-설정해줘서 [AWS Web Console CloudWatch][webconsole_cloudwatch] 의 Logs 메뉴에서
-`/aws/lambda/sls-hello-world-dev-dynamicHello` 와 같은 로그 그룹을 찾을 수 있고
-클릭해서 들어가면 Lambda function 의 트리거 시작과 종료, 그리고 console.log 로
-찍은 로그 등을 확인 할 수 있다.
+`invoke` 명령으로 로그를 보는 법 말고도 **serverless** 가 기본으로 CloudWatch
+LogGroup 을 설정해주고 로그를 쌓아주므로 [CloudWatch][webconsole_cloudwatch] 의
+`Logs` 메뉴에서 위 디버깅 로그로 남긴 `logGroupName` 값, `logStreamName` 값,
+`awsRequestId` 값 순으로 찾아 들어가서 로그를 확인 할 수 있다.
 
-# AWS 자원 사용하기 - S3
-Lambda function 에서 s3 버킷에 접근하기 위해 `serverless.yml` 파일 `provider`
-설정 아래 `iamRoleStatements` 설정을 아래와 같이 추가해보자.
+바로 똑같은 `invoke` 명령어를 한번 더 실행해보면 `count` 값이 1 증가되는 것을
+볼 수 있는데 이로써 **실행 컨텍스트** 가 재사용 되었다는 것을 확인 할 수 있다.
+```
+    "body": "\n      <h1>hello 2th 방문자님!!</h1> ...
+```
+
+테스트 결과 `logStreamName` 이 변경되면 `count` 값이 0으로 초기화 되는 것을
+확인 할 수 있는데 `logStreamName` 은 **실행 컨텍스트** 마다 생성되는 것으로
+강력하게 추정된다. **일정시간** 만큼만 **실행 컨텍스트** 를 소멸하지 않고
+유지하기 때문에 한 20분 후에 다시 호출해보면 `logStreamName` 이 변경되며
+`count` 값이 0으로 초기화 되는 것을 볼 수 있다. **일정시간** 에 대해서는 딱
+공개된 정보는 없고 유저가 컨트롤 하지 못하는 영역이다.
+
+# event 설정
+지금까지는 serverless 의 invoke 명령을 통해서 즉, 내부적으로 AWS API 를 통해
+Lambda Function 을 트리거 시켰었다. 이런 방법 외에 Lambda function 은 여러가지
+이벤트에 의해 트리거 될 수 있는데 API Gateway, CloudWatch Event, AWS IoT, S3
+Event, SNS, SQS 등 이밖에 많은 서비스들의 이벤트를 받을 수 있다.
+`serverless.yml` 의 각 `functions.[functionId].events` 프로퍼티를 통해 function
+단위로 이벤트 설정을 할 수 있다.
+
+## API Gateway
+API Gateway 로 http request 를 받을 수 있는 endpoint 를 생성하고 이를 통해
+Lambda function 을 호출해보자. 각각의 `function` 에 `http` 이벤트를 추가하자.
+
+```diff
+  functions:
+   hello:
+     handler: handler.hello
++    events:
++      - http:
++          path: hello
++          method: get
+   dynamicHello:
+     handler: dynamicHelloHandler.hello
++    events:
++      - http:
++          path: dynamicHello
++          method: get
+```
+
+배포해보자. output 으로 ApiGateway 자원이 생성되는 것이 보일 것이다.
+```sh
+$ npx sls deploy --verbose
+
+...skip...
+
+Serverless: Stack update finished...
+Service Information
+service: sls-hello333
+stage: dev
+region: ap-southeast-1
+stack: sls-hello333-dev
+api keys:
+  None
+endpoints:
+  GET - https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/hello
+  GET - https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/dynamicHello
+functions:
+  hello: sls-hello333-dev-hello
+  dynamicHello: sls-hello333-dev-dynamicHello
+
+Stack Outputs
+DynamicHelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello333-dev-dynamicHello:1
+HelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello333-dev-hello:1
+ServiceEndpoint: https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev
+ServerlessDeploymentBucketName: sls-hello333-dev-serverlessdeploymentbucket-us6okqk60pg3
+```
+
+`endpoints` 에 https 로 시작하는 url 을 확인 할 수 있는데 브라우저나 `curl` 을
+통해 접속해보자.
+
+```sh
+$ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/hello
+{"message":"Go Serverless v1.0! Your function executed successfully!","input":{"resource":"/hello","path":"/hello","httpMethod":"GET","headers":{"Accept":"*/*","CloudFront-Forwarded-Proto":"https","CloudFront-Is-Desktop-Viewer":"true","CloudFront-Is-Mobile-Viewer":"false","CloudFront-Is-SmartTV-Viewer":"false","CloudFront-Is-Tablet-Viewer":"false","CloudFront-Viewer-Country":"KR","Host":"j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com","User-Agent":"curl/7.54.0","Via":"2.0 da3be2ba5cd319952c9db52c6f3c715c.cloudfront.net (CloudFront)","X-Amz-Cf-Id":"EXYx-PohLXNwa4eGx1GOEBV5kP7qZsbginFMQZOjGVvyxPVFdYP0dg==","X-Amzn-Trace-Id":"Root=1-5b8eaee8-07672508c938123458d48bb8","X-Forwarded-For":"175.223.11.52, 54.182.204.73","X-Forwarded-Port":"443","X-Forwarded-Proto":"https"},"queryStringParameters":null,"pathParameters":null,"stageVariables":null,"requestContext":{"resourceId":"b6n6vi","resourcePath":"/hello","httpMethod":"GET","extendedRequestId":"MtBEXFi2SQ0FnSg=","requestTime":"04/Sep/2018:16:12:24 +0000","path":"/dev/hello","accountId":"666252830126","protocol":"HTTP/1.1","stage":"dev","requestTimeEpoch":1536077544798,"requestId":"4f8e6888-b05d-11e8-a741-250502e1c1f9","identity":{"cognitoIdentityPoolId":null,"accountId":null,"cognitoIdentityId":null,"caller":null,"sourceIp":"175.223.11.52","accessKey":null,"cognitoAuthenticationType":null,"cognitoAuthenticationProvider":null,"userArn":null,"userAgent":"curl/7.54.0","user":null},"apiId":"j4ee7ascxe"},"body":null,"isBase64Encoded":false}}
+```
+
+`invoke` 로 호출하였을때 빈 object 였던 `event` 객체에 정보가 담겨 있다.
+
+```
+$ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/dynamicHello
+
+      <h1>hello 1th 방문자님!!</h1>
+      <h3>context.logGroupName: /aws/lambda/sls-hello333-dev-dynamicHello</h3>
+      <h3>context.awsRequestId: 6e77c4cb-b05d-11e8-92df-9f64c0543e9c</h3>
+      <h3>context.logStreamName: 2018/09/04/[$LATEST]fdbf1b3ea9c443348236d035e4e10f42</h3>
+```
+
+잘 동작하는 것을 확인하였으면 커밋하자:
+```sh
+$ git add serverless.yml
+$ git commit -m "add http event"
+```
+
+# remove
+다음 예제에서 default region 인 `us-east-1` 에 배포된 Lambda function 을
+다른 리전으로 변경 할 것이다. `remove` 명령을 사용해 현재 배포된 자원들을
+삭제한 뒤 리전 셋팅을 하고 다시 배포할 것이다.
+
+```
+$ npx sls remove --verbose
+```
+
+ServerlessDeploymentBucket, CloudWatch LogGroup 모두 삭제 되니 운영환경에서는
+주의해서 사용해야한다.
+
+# S3 Access
+흔히 볼 수 있는 serverless 예제 중 하나는 S3 에 접근하여 Object 를 읽어오거나
+저장하는 예제이다. S3 의 텍스트 파일을 upload 한뒤 Lambda fuction 에서 이
+Object 를 읽어와 응답으로 내려주는 핸들러를 작성해보자.
+
+## Execution role
+Lambda function 에서 AWS 자원에 접근하기 위해서는 해당 자원에 대한 권한이 있어야 한다.
+Execution role 설정으로 Lambda function 이 실행될 때 사용하는 IAM Role 을 선택하는데,
+확인해보면 deploy 할 때 serverless 가 IAM Role 을 하나 생성한 것을 발견 할 수 있다.
+기본적으로 로그 그룹에 로그를 올릴 수 있도록 `logs:PutlogEvents` 권한만 가지고 있는데,
+`provider.iamRoleStatements` 설정을 추가하여 S3 특정 버킷 접근 권한을 추가 할 수 있다.
 
 ```diff
  provider:
    name: aws
    runtime: nodejs8.10
++  region: ap-southeast-1
 +  iamRoleStatements:
 +    - Effect: Allow
 +      Action:
@@ -554,44 +713,78 @@ Lambda function 에서 s3 버킷에 접근하기 위해 `serverless.yml` 파일 
 +      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 ```
 
-## serverless.yml 설정에 환경변수 사용하기
+## serverless.yml 설정에서 환경변수 사용하기
 `${env:SLS_BUCKET_NAME}` 부분을 주목하자. s3 버킷 이름 등을 하드코딩하면 다른
 환경에서 사용하거나 오픈소스로 오픈할 때 사용하는 사람은 코드를 수정해야만 할
-것이다. 환경마다 달라질 수 있는 부분은 환경변수로 따로 빼는 것이 좋다. 이런
-환경변수를 `.envrc` 파일에 추가하여 `deploy` 하기전 현재 쉘에 셋팅해주면
-`${env:SOME_VAR}` 와 같은 문법으로 사용 할 수 있다.
+것이다. 환경마다 달라질 수 있는 부분은 환경변수로 따로 빼는 것이 좋다.
 
-```diff
+`${env:SOME_VAR}` 이런 문법을 사용하여 현재 쉘의 환경변수를 `serverless.yml`
+안에서 참고 할 수 있다. 또 환경변수를 배운 지금이 리전을 설정할 타이밍이다.
+`provider.iamRoleStatements` 설정 외에 `provider.region` 설정도 추가했다.
+`SLS_BUCKET_NAME` 과 함께 `AWS_DEFAULT_REGION` 환경 변수도 추가해주자. `.envrc`
+파일을 통해 환경변수를 관리한다면 다음과 같이 설정되었을 것이다.
+
+```sh
 # .envrc
-export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXXXXX
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export AWS_ACCESS_KEY_ID=AKXXXXXXXXXXXXXXXXGQ
+export AWS_SECRET_ACCESS_KEY=+IxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxK5
+export AWS_DEFAULT_REGION=ap-southeast-1
 
-+export SLS_BUCKET_NAME=sls-hello-world-91283712
+export SLS_BUCKET_NAME=sls-hello-world-29387413
 ```
 
 ## s3 bucket access
-nodejs 라이브러리인 [aws-sdk][aws_sdk_js] 를 사용하여 s3 버킷의 파일 목록을
-가져와보자.
+nodejs 라이브러리인 [aws-sdk][aws_sdk_js] 를 사용하여 s3 버킷을 생성하고
+`package.json` 파일을 업로드 해두자.
 
-```
-$ aws s3api create-bucket --bucket $SLS_BUCKET_NAME
-$ aws s3 cp image1.jpg s3://$SLS_BUCKET_NAME/
-$ aws s3 cp image2.jpg s3://$SLS_BUCKET_NAME/
+```sh
+$ source .envrc
+$ aws s3api create-bucket --bucket $SLS_BUCKET_NAME --region $AWS_DEFAULT_REGION
+{
+    "Location": "http://sls-hello-world-29387413.s3.amazonaws.com/"
+}
+$ aws s3 cp package.json s3://$SLS_BUCKET_NAME/
 ```
 
 ## Labmda Function 에 환경변수 사용하기
-`handler.js` 에 `getS3Object` 라는 함수를 아래와 같이 생성하자:
+이번엔 `dynamicHelloHandler.js` 파일에 getS3Object 함수를 추가해보자.
 
 ```diff
+$ git diff dynamicHelloHandler.js
+diff --git a/dynamicHelloHandler.js b/dynamicHelloHandler.js
+index bae491e..182c40f 100644
+--- a/dynamicHelloHandler.js
++++ b/dynamicHelloHandler.js
+@@ -1,4 +1,7 @@
+ // dynamicHelloHandler.js
++
++const AWS = require('aws-sdk')
++
+ let count = 1
+ module.exports.hello = (event, context, callback) => {
+
+@@ -19,3 +22,23 @@ module.exports.hello = (event, context, callback) => {
+   }
+   callback(null, response)
+ }
++
++
++const Bucket = process.env.SLS_BUCKET_NAME
 +module.exports.getS3Object = (event, context, callback) => {
++
++  console.log(event)
++  console.log(context)
++
++  const Key = event.pathParameters.key
++
 +  const s3 = new AWS.S3()
-+  const params = { Bucket: process.env.SLS_BUCKET_NAME, Key: event.path }
++  const params = { Bucket, Key }
 +  s3.getObject(params, (err,data) => {
 +    if( err ) {
 +      callback(err)
 +      return
 +    }
-+    callback(null, { statusCode: 200, body: data })
++    callback(null, { statusCode: 200, body: data.Body.toString('utf-8') })
 +  })
 +}
 ```
@@ -602,51 +795,73 @@ $ aws s3 cp image2.jpg s3://$SLS_BUCKET_NAME/
 설정을 통해서 Lambda Function 실행환경의 환경변수를 셋팅 할 수 있다.
 
 ```diff
- provider:
-   name: aws
-   runtime: nodejs8.10
-   stage: ${env:SLS_STAGE}
-   region: ap-northeast-2
+ diff --git a/serverless.yml b/serverless.yml
+index 1bfe983..747017c 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -18,6 +18,8 @@ provider:
+         - s3:PutObject
+         - s3:ListObjects
+       Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 +  environment:
 +    SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
-   iamRoleStatements:
-     - Effect: Allow
-```
 
-위처럼 `provider` 설정 아래에 `environment` 설정을 두고 `KEY: Value` 로
-설정 하면 모든 `functions` 아래 handler 들이 영향 받는다.
-
-```diff
  functions:
    hello:
-     handler: handler.hello
-+    environment:
-+      ENV_FOR_HELLO: env_for_hello
-+      SLS_BUCKET_NAME: check-environment
-   s3ObjectList:
-     handler: handler.s3ObjectList
+@@ -32,3 +34,9 @@ functions:
+       - http:
+           path: dynamicHello
+           method: get
++  getS3Object:
++    handler: dynamicHelloHandler.getS3Object
++    events:
++      - http:
++          path: getS3Object/{key}
++          method: get
 ```
 
-연습을 위해 `hello` handler 아래에도 environment 를 추가했다. 여기의
-`SLS_BUCKET_NAME` 은 위 `provider` 쪽에 설정한 같은 이름의 환경변수를 덮어쓰기
-할 것 이다. `hello` 쪽에 추가한 환경 변수는 공부삼아 한번 확인해 보길 바라고
-이제 s3 object list 를 잘 가져오는지 확인해보자.
+위처럼 `provider` 설정 아래에 `environment` 설정을 두고 `KEY: Value` 로 설정
+하면 모든 Lambda functions 에서 접근 가능해지며 특정 function 아래
+`environment` 를 두면 해당 function 에서만 접근 가능한 환경 변수가 셋팅된다.
+
+`getS3Object` function 도 추가하였는데 http 이벤트의 path 값으로
+`getS3Object/{key}` 를 사용한다. `/getS3Object/package.json` 이런 path 로
+접속하면 `{key}` 위치에 해당하는 값을 첫번째 인자인 `event` 객체 아래
+`pathParameters` 객체에서 찾을 수 있다.
 
 ```sh
-$ npx sls deploy -v
-$ npx sls invoke -f s3ObjectList
-$ npx sls invoke -f s3ObjectList | jq -r .body | jq .Contents[].Key
+$ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/getS3Object/package.json
+{
+  "name": "sls-hello333",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "serverless": "^1.30.3"
+  },
+  "devDependencies": {
+    "js-yaml": "^3.12.0"
+  }
+}
 ```
 
-자알 가져온다.
+S3 로 upload 시켰던 `package.json` 파일의 내용이 잘 내려오는 것을 확인 할 수 있다.
+커밋하고 넘어가자.
+
+```sh
+$ git add serverless.yml
+$ git add dynamicHelloHandler.js
+$ git commit -m "add getS3Object for s3 access example"
+```
 
 # 모듈화 & 서드파티 모듈 사용하기
-npm 을 통해 설치한 서드파티 모듈을 사용하는 Lambda Function 을 작성해보자.  흔한
+npm 을 통해 설치한 서드파티 모듈을 사용하는 Lambda Function 을 작성해보자. 흔한
 예제인 이미지 리사이징을 해볼텐데, s3 의 이미지를 가져오고, 리사이징하고, 다시
 업로드 시키는 함수는 다음과 같다.
 
 ```js
-// src/imgUtil.js
+// ./lib/imgUtil.js
+
 import AWS from 'aws-sdk'
 import path from 'path'
 import fs from 'fs'
@@ -682,42 +897,97 @@ export const uploadImage = (buffer, info, bucketName, prefix) =>
   }).promise()
 ```
 
-handler.js 쪽에서 이 코드를 불러와 사용해보자. 테스트로 objectList 로 가져온
-0번째 이미지를 리사이즈 해볼 것 이다. js 파일들이 1개 이상 되었으므로 설정
-파일과 실제 동작하는 코드를 분리하기 위해 코드들을 `src/` 디렉토리 밑으로 넣는
-리팩토링도 함께 진행하자.
+`resizeHandler.js` 새 핸들러 파일을 만들고 위 코드를 불러와 사용해보자.
+
+```js
+const AWS = require('aws-sdk')
+const imgUtil = require('./lib/imgUtil')
+
+const Bucket = process.env.Bucket
+
+module.exports.resize = (event, context, callback) => {
+
+  let imgInfo
+
+  downloadImage( BUCKET_NAME, event.Records[0].s3.object.key )
+  .then( imgPath => {
+    console.log( `imgPath: ${imgPath}` )
+    return getImageInfo( imgPath )
+
+  }).then( _imgInfo => {
+    imgInfo = _imgInfo
+    console.log( 'imgInfo: ' )
+    console.log( JSON.stringify(imgInfo,null,2) )
+    return resizeImage(imgInfo, '800x600')
+
+  }).then( buffer => {
+    return uploadImage(buffer, imgInfo, BUCKET_NAME, 'resize')
+
+  }).then( data => {
+    callback(null, { statusCode: 200, body: JSON.stringify(data,null,2) })
+
+  }).catch( err => {
+    callback(err)
+  })
+}
+```
+
+## S3 ObjectCreated event
+이미지 파일을 s3 에 업로드하면 발생하는 ObjectCreated 이벤트로 위의 resize
+함수를 호출하기 위해 `serverless.yml` 에 새 함수와 이벤트 설정을 추가하자.
 
 ```diff
-const AWS = require('aws-sdk')
-+const imgUtil = require('./imgUtil')
-
-+module.exports.resize = (event, context, callback) => {
-+  let imgInfo
-+  s3.listObjects({ Bucket: BUCKET_NAME }).promise().then( objectList => {
-+    console.log( JSON.stringify(objectList,null,2) )
-+    return downloadImage( BUCKET_NAME, objectList.Contents[0].Key )
-+
-+  }).then( imgPath => {
-+    console.log( `imgPath: ${imgPath}` )
-+    return getImageInfo( imgPath )
-+
-+  }).then( _imgInfo => {
-+    imgInfo = _imgInfo
-+    console.log( 'imgInfo: ' )
-+    console.log( JSON.stringify(imgInfo,null,2) )
-+    return resizeImage(imgInfo, '800x600')
-+
-+  }).then( buffer => {
-+    return uploadImage(buffer, imgInfo, BUCKET_NAME, 'resize')
-+
-+  }).then( data => {
-+    callback(null, { statusCode: 200, body: JSON.stringify(data,null,2) })
-+
-+  }).catch( err => {
-+    callback(err)
-+  })
-+}
+  resize:
+    handler: handler.resize
+    events:
+    - s3:
+      bucket: ${env:SLS_BUCKET_NAME}
+        event: s3:ObjectCreated:*
+        rules:
+        - suffix: .png,jpg,jpeg
 ```
+
+배포해보자.
+```
+$ npx sls deploy --verbose
+
+...skip...
+
+Serverless: Operation failed!
+
+  Serverless Error ---------------------------------------
+
+  An error occurred: S3BucketSlshelloworld29387413 - sls-hello-world-29387413 already exists.
+
+  Get Support --------------------------------------------
+     Docs:          docs.serverless.com
+     Bugs:          github.com/serverless/serverless/issues
+     Issues:        forum.serverless.com
+
+  Your Environment Information -----------------------------
+     OS:                     darwin
+     Node Version:           8.9.4
+     Serverless Version:     1.30.3
+```
+
+두가지 문제가 있다 첫번째는 `sls-hello-world-29387413 already exists` 에러가
+나면서 deploy 가 실패 한다는 것이고 두번째는 deploy 시 `node_modules` 아래에
+사용하는 모듈들을 찾아 함께 압축하여 올려야 한다는 것이다.
+
+### serverless-plugin-exist-s3
+
+```
+$ yarn add serverless-plugin-existing-s3
+```
+
+https://github.com/matt-filion/serverless-external-s3-event
+
+```
+plugins:
+ - serverless-plugin-existing-s3
+```
+
+// TODO
 
 
 ## serverless-webpack
@@ -826,90 +1096,7 @@ $ npx sls deploy -v
 에러 없이 배포와 실행이 잘 되었다면 AWS Web Console 을 통해 `resize` prefix 아래
 resize 된 파일이 생성되었는지 확인하자.
 
-# event 설정
-지금까지는 serverless 의 invoke 명령을 통해서 즉, 내부적으로 AWS API 를 통해
-Lambda Function 을 트리거 시켰다. events 설정을 통해 Lambda Function 을 여러가지
-방법으로 트리거 시킬 수 있다. 가장 많이 사용되는 2가지 방법에 대해 알아보자.
 
-## API Gateway
-API Gateway 를 통해 http 요청으로 Lambda Funtion 을 트리거 시킬 수 있게 각각의
-Function 에 `events` 설정을 추가해보자.
-
-```diff
- functions:
-   hello:
-     handler: handler.hello
-+    events:
-+      - http:
-+          path: hello
-+          method: get
-   s3ObjectList:
-     handler: handler.s3ObjectList
-+    events:
-+      - http:
-+          path: s3ObjectList
-+          method: get
-```
-
-이것은 handler.hello Function 을 `/hello` path 로, handler.s3ObjectList 를
-`/getObjectLilst` path 를 통해 트리거 시킬 수 있도록 API Gateway 를 설정하라는
-의미이다.  해본 사람은 알겠지만 AWS Web Console 로 이정도 설정 하는 것도 꽤
-귀찮고 어려운 작업이다.  `serverless` 의 첫번째 장점이 바로 이런 복잡한 인프라
-자원의 설정을 yml 파일을 통해 알아서 자동으로 해주는 `Infrastructure as code` 를
-구현할 수 있게 해주는 점이다. 배포해보자.
-
-```
-$ npx sls deploy --verbose
-Serverless: Packaging service...
-Serverless: Excluding development dependencies...
-Serverless: Uploading CloudFormation file to S3...
-Serverless: Uploading artifacts...
-Serverless: Uploading service .zip file to S3 (651 B)...
-Serverless: Validating template...
-Serverless: Updating Stack...
-Serverless: Checking Stack update progress...
-......................
-Serverless: Stack update finished...
-Service Information
-service: my-first-serverless-service
-stage: dev
-region: ap-northeast-2
-stack: my-first-serverless-service-dev
-api keys:
-  None
-endpoints:
-  GET - https://l4gj9125q9.execute-api.ap-northeast-2.amazonaws.com/dev/hello
-  GET - https://l4gj9125q9.execute-api.ap-northeast-2.amazonaws.com/dev/s3ObjectList
-functions:
-  hello: my-first-serverless-service-dev-hello
-  getObjectList: my-first-serverless-service-dev-getObjectList
-Serverless: Removing old service artifacts from S3...
-```
-
-output 의 `endpoints` 를 주목하자. `l4gj9125q9` 와 같이 고유의 API Gateway
-주소가 생성되고 2개의 주소를 각각 브라우저로 접속해서 결과가 잘 나오는지
-확인해보자.
-
-## S3 ObjectCreated event
-s3 에 파일을 업로드하면 발생하는 ObjectCreated 이벤트로 Lambda Function 을
-호출해보자. 위에서 작성한 resize handler 는 s3 `upload` prefix 아래에 있는
-첫번재 이미지를 resize 하게 작성되어 있다. 이것을 조금 변경하여 `upload` prefix
-로 새로운 이미지가 올라왔을때 그 이미지를 resize 한뒤 `resize` prefix 에 업로드
-시키는 코드로 변경해보자.
-
-```diff
-  resize:
-    handler: handler.resize
-    events:
-    - s3:
-      bucket: ${env:SLS_BUCKET_NAME}
-        event: s3:ObjectCreated:*
-        rules:
-        - suffix: .png
-```
-
-### serverless-plugin-exist-s3
-// TODO
 
 # react
 마지막으로 지금까지 만든 기능들을 Web UI 로 만들어보자.  react 를 사용할 것인데
@@ -951,7 +1138,7 @@ Stateless 자원을 **Cattle**, Serverless 자원을 **Insects** 에 비유하�
 [aws_sdk_js]: https://github.com/aws/aws-sdk-js
 [npx]: https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner
 [sls_package]: https://www.npmjs.com/package/serverless
-[webconsole_labmda]: https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions
+[webconsole_lambda]: https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions
 [webconsole_cloudwatch]: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:
 [petcattleinsect]: https://blog.rackspace.com/pets-cattle-and-nowinsects
 [velopert_lambda]: https://velopert.com/3546
@@ -961,7 +1148,7 @@ Stateless 자원을 **Cattle**, Serverless 자원을 **Insects** 에 비유하�
 [lambda_execution_model]: https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/running-lambda-code.html
 [yarn]: https://yarnpkg.com/en/
 [npm]: https://www.npmjs.com/
-
+[async]: https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/async_function
 https://www.slideshare.net/awskorea/aws-lambda-100-sangpil-kim
 https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
 https://github.com/serverless/examples
