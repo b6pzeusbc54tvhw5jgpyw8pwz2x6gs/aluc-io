@@ -464,7 +464,7 @@ index 3a97e31..35bbb84 100644
 --- a/serverless.yml
 +++ b/serverless.yml
 @@ -1,5 +1,12 @@
- service: sls-hello333 # NOTE: update this with your service name
+ service: sls-hello-world
 
 +package:
 +  exclude:
@@ -554,7 +554,7 @@ $ npx sls invoke --function dynamicHello --log
     "headers": {
         "Content-Type": "text/html; charset=utf-8;"
     },
-    "body": "\n      <h1>hello 1th 방문자님!!</h1>\n      <h3>context.logGroupName: /aws/lambda/sls-hello333-dev-dynamicHello</h3>\n      <h3>context.awsRequestId: 573048a6-b034-11e8-9404-bbe59aba3f24</h3>\n      <h3>context.logStreamName: 2018/09/04/[$LATEST]0c3c0ba410494f9e926deaf73c7f4129</h3>\n    "
+    "body": "\n      <h1>hello 1th 방문자님!!</h1>\n      <h3>context.logGroupName: /aws/lambda/sls-hello-world-dev-dynamicHello</h3>\n      <h3>context.awsRequestId: 573048a6-b034-11e8-9404-bbe59aba3f24</h3>\n      <h3>context.logStreamName: 2018/09/04/[$LATEST]0c3c0ba410494f9e926deaf73c7f4129</h3>\n    "
 }
 --------------------------------------------------------------------
 START RequestId: b72a2f8b-af80-11e8-8b7b-d10ef88ce9a1 Version: $LATEST
@@ -598,7 +598,7 @@ LogGroup 을 설정해주고 로그를 쌓아주므로 [CloudWatch][webconsole_c
 지금까지는 serverless 의 invoke 명령을 통해서 즉, 내부적으로 AWS API 를 통해
 Lambda Function 을 트리거 시켰었다. 이런 방법 외에 Lambda function 은 여러가지
 이벤트에 의해 트리거 될 수 있는데 API Gateway, CloudWatch Event, AWS IoT, S3
-Event, SNS, SQS 등 이밖에 많은 서비스들의 이벤트를 받을 수 있다.
+Event, SNS, SQS 등 [이밖에 많은 서비스들][serverless_event]의 이벤트를 받을 수 있다.
 `serverless.yml` 의 각 `functions.[functionId].events` 프로퍼티를 통해 function
 단위로 이벤트 설정을 할 수 있다.
 
@@ -630,24 +630,24 @@ $ npx sls deploy --verbose
 
 Serverless: Stack update finished...
 Service Information
-service: sls-hello333
+service: sls-hello-world
 stage: dev
 region: ap-southeast-1
-stack: sls-hello333-dev
+stack: sls-hello-world-dev
 api keys:
   None
 endpoints:
   GET - https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/hello
   GET - https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/dynamicHello
 functions:
-  hello: sls-hello333-dev-hello
-  dynamicHello: sls-hello333-dev-dynamicHello
+  hello: sls-hello-world-dev-hello
+  dynamicHello: sls-hello-world-dev-dynamicHello
 
 Stack Outputs
-DynamicHelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello333-dev-dynamicHello:1
-HelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello333-dev-hello:1
+DynamicHelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello-world-dev-dynamicHello:1
+HelloLambdaFunctionQualifiedArn: arn:aws:lambda:ap-southeast-1:666252830126:function:sls-hello-world-dev-hello:1
 ServiceEndpoint: https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev
-ServerlessDeploymentBucketName: sls-hello333-dev-serverlessdeploymentbucket-us6okqk60pg3
+ServerlessDeploymentBucketName: sls-hello-world-dev-serverlessdeploymentbucket-us6okqk60pg3
 ```
 
 `endpoints` 에 https 로 시작하는 url 을 확인 할 수 있는데 브라우저나 `curl` 을
@@ -664,7 +664,7 @@ $ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/hello
 $ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/dynamicHello
 
       <h1>hello 1th 방문자님!!</h1>
-      <h3>context.logGroupName: /aws/lambda/sls-hello333-dev-dynamicHello</h3>
+      <h3>context.logGroupName: /aws/lambda/sls-hello-world-dev-dynamicHello</h3>
       <h3>context.awsRequestId: 6e77c4cb-b05d-11e8-92df-9f64c0543e9c</h3>
       <h3>context.logStreamName: 2018/09/04/[$LATEST]fdbf1b3ea9c443348236d035e4e10f42</h3>
 ```
@@ -709,7 +709,7 @@ Execution role 설정으로 Lambda function 이 실행될 때 사용하는 IAM R
 +      Action:
 +        - s3:GetObject
 +        - s3:PutObject
-+        - s3:ListObjects
++        - s3:ListBucket
 +      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 ```
 
@@ -730,7 +730,7 @@ export AWS_ACCESS_KEY_ID=AKXXXXXXXXXXXXXXXXGQ
 export AWS_SECRET_ACCESS_KEY=+IxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxK5
 export AWS_DEFAULT_REGION=ap-southeast-1
 
-export SLS_BUCKET_NAME=sls-hello-world-29387413
+export SLS_BUCKET_NAME=sls-hello-world-293874131
 ```
 
 ## s3 bucket access
@@ -741,7 +741,7 @@ nodejs 라이브러리인 [aws-sdk][aws_sdk_js] 를 사용하여 s3 버킷을 �
 $ source .envrc
 $ aws s3api create-bucket --bucket $SLS_BUCKET_NAME --region $AWS_DEFAULT_REGION
 {
-    "Location": "http://sls-hello-world-29387413.s3.amazonaws.com/"
+    "Location": "http://sls-hello-world-293874131.s3.amazonaws.com/"
 }
 $ aws s3 cp package.json s3://$SLS_BUCKET_NAME/
 ```
@@ -789,10 +789,12 @@ index bae491e..182c40f 100644
 +}
 ```
 
-`process.env.SLS_BUCKET_NAME` 을 주목하자. `source .envrc` 로 로컬 쉘에
-환경변수 셋팅을 해놓았을지라도 Lambda function 실행환경에서 `process.env` 로
-접근 할 수 있는 환경변수가 셋팅되지는 않는다. `serverless.yml` 에 `environment`
-설정을 통해서 Lambda Function 실행환경의 환경변수를 셋팅 할 수 있다.
+코드에서 `process.env` 를 통해 환경변수에 접근하고 있다. `source .envrc`
+명령으로 `deploy` 전 로컬 쉘에 환경변수 셋팅을 해놓았을지라도 그 환경변수는
+`serverless.yml` 에 `${env:SOME_VAR}` 문법으로 사용할 수 있게 제공되는 것이지
+Lambda function 실행환경에서 `process.env` 로 접근 할 수는 없다.
+`serverless.yml` 에 `environment` 설정을 추가해 줘야 Lambda Function 실행환경의
+환경변수가 셋팅된다.
 
 ```diff
  diff --git a/serverless.yml b/serverless.yml
@@ -801,7 +803,7 @@ index 1bfe983..747017c 100644
 +++ b/serverless.yml
 @@ -18,6 +18,8 @@ provider:
          - s3:PutObject
-         - s3:ListObjects
+         - s3:ListBucket
        Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 +  environment:
 +    SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
@@ -832,7 +834,7 @@ index 1bfe983..747017c 100644
 ```sh
 $ curl https://j4ee7ascxe.execute-api.ap-southeast-1.amazonaws.com/dev/getS3Object/package.json
 {
-  "name": "sls-hello333",
+  "name": "sls-hello-world",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -860,12 +862,11 @@ npm 을 통해 설치한 서드파티 모듈을 사용하는 Lambda Function 을
 업로드 시키는 함수는 다음과 같다.
 
 ```js
-// ./lib/imgUtil.js
+// lib/imgUtil.js
 
 import AWS from 'aws-sdk'
 import path from 'path'
 import fs from 'fs'
-import { ulid } from 'ulid'
 import _gm from 'gm'
 
 const gm = _gm.subClass({ imageMagick: true })
@@ -887,30 +888,38 @@ export const resizeImage = (info, size) => new Promise((resolve, reject) => {
   gm(info.path).resize(resizeOpts[1], resizeOpts[2], resizeOpts[3])
  .toBuffer(info.format, (err, buffer) => err ? reject(err) : resolve(buffer))
 })
-
-export const uploadImage = (buffer, info, bucketName, prefix) =>
-  s3.upload({
-    Bucket: bucketName,
-    Key: `${prefix}/${ulid()}.${info.format}`,
-    Body: buffer,
-    ContentType: info['Mime type'],
-  }).promise()
 ```
 
-`resizeHandler.js` 새 핸들러 파일을 만들고 위 코드를 불러와 사용해보자.
+모든 코드를 다 이해할 필요는 없고 함수 이름으로 유추만 해보면 된다. 이
+코드에서는 `require` 대신에 `import` 를, `module.exports.functionName` 대신
+`export const functionName` 을 사용했다는 점이 중요하다. javascript ES6 스펙을
+사용한 것인데 nodejs 8.10 버전에서도 모든 ES6 스펙을 지원하는 것은 아니기
+때문에 실행 되는 코드로 변환시켜주는 transform 작업이 필요하다. 우선 이 코드로
+배포 후 돌아가지 않는 것을 확인 한 뒤 해결해 볼 것이다.
+
+새 핸들러 파일 `resizeHandler.js` 을 만들고 위 코드를 불러와 사용해보자.
 
 ```js
+// resizeHandler.js
+
+const path = require('path')
+
 const AWS = require('aws-sdk')
 const imgUtil = require('./lib/imgUtil')
 
-const Bucket = process.env.Bucket
+const Bucket = process.env.SLS_BUCKET_NAME
+const downloadImage = imgUtil.downloadImage
+const getImageInfo = imgUtil.getImageInfo
+const resizeImage = imgUtil.resizeImage
+const s3 = new AWS.S3()
 
 module.exports.resize = (event, context, callback) => {
 
-  let imgInfo
+  const originalKey = event.Records[0].s3.object.key
+  console.log('originalKey: ' + originalKey)
 
-  downloadImage( BUCKET_NAME, event.Records[0].s3.object.key )
-  .then( imgPath => {
+  let imgInfo
+  downloadImage( Bucket, originalKey ).then( imgPath => {
     console.log( `imgPath: ${imgPath}` )
     return getImageInfo( imgPath )
 
@@ -918,10 +927,14 @@ module.exports.resize = (event, context, callback) => {
     imgInfo = _imgInfo
     console.log( 'imgInfo: ' )
     console.log( JSON.stringify(imgInfo,null,2) )
-    return resizeImage(imgInfo, '800x600')
+    return resizeImage(imgInfo, '160x120')
 
   }).then( buffer => {
-    return uploadImage(buffer, imgInfo, BUCKET_NAME, 'resize')
+    const Key = path.join('resize', path.basename(originalKey))
+    console.log('(resized)Key: ' + Key)
+    const Body = buffer
+    const ContentType = imgInfo['Mime type']
+    return s3.upload({ Bucket, Key, Body, ContentType }).promise()
 
   }).then( data => {
     callback(null, { statusCode: 200, body: JSON.stringify(data,null,2) })
@@ -932,19 +945,41 @@ module.exports.resize = (event, context, callback) => {
 }
 ```
 
+S3 에 이미지가 업로드되면 `resize` 함수가 호출되어 이미지를 먼저 다운 받고
+`320x240` 로 리사이즈 한 뒤 리사이즈된 이미지를 S3 버킷 `resize/` prefix 에
+업로드 하는 예제이다.
+
 ## S3 ObjectCreated event
 이미지 파일을 s3 에 업로드하면 발생하는 ObjectCreated 이벤트로 위의 resize
 함수를 호출하기 위해 `serverless.yml` 에 새 함수와 이벤트 설정을 추가하자.
 
 ```diff
-  resize:
-    handler: handler.resize
-    events:
-    - s3:
-      bucket: ${env:SLS_BUCKET_NAME}
-        event: s3:ObjectCreated:*
-        rules:
-        - suffix: .png,jpg,jpeg
+$ git diff serverless.yml
+diff --git a/serverless.yml b/serverless.yml
+index 747017c..f6fa169 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -6,6 +6,8 @@ package:
+   include:
+     - handler.js
+     - dynamicHelloHandler.js
++    - resizeHandler.js
++    - lib/imgUtil.js
+
+ provider:
+   name: aws
+@@ -40,3 +42,11 @@ functions:
+       - http:
+           path: getS3Object/{key}
+           method: get
++  resize:
++    handler: resizeHandler.resize
++    events:
++      - s3:
++          bucket: ${env:SLS_BUCKET_NAME}
++          event: s3:ObjectCreated:*
++          rules:
++            - suffix: .png,jpg,jpeg
 ```
 
 배포해보자.
@@ -957,7 +992,7 @@ Serverless: Operation failed!
 
   Serverless Error ---------------------------------------
 
-  An error occurred: S3BucketSlshelloworld29387413 - sls-hello-world-29387413 already exists.
+  An error occurred: S3BucketSlshelloworld293874131 - sls-hello-world-293874131 already exists.
 
   Get Support --------------------------------------------
      Docs:          docs.serverless.com
@@ -970,168 +1005,604 @@ Serverless: Operation failed!
      Serverless Version:     1.30.3
 ```
 
-두가지 문제가 있다 첫번째는 `sls-hello-world-29387413 already exists` 에러가
-나면서 deploy 가 실패 한다는 것이고 두번째는 deploy 시 `node_modules` 아래에
-사용하는 모듈들을 찾아 함께 압축하여 올려야 한다는 것이다.
+`sls-hello-world-293874131 already exists` 에러가 나면서 deploy 가 실패 한다.
 
 ### serverless-plugin-exist-s3
+이 문제는 `events` 프로퍼티에 S3 event 가 추가되면 serverless 의 기본 동작은
+일단 새로운 버킷을 생성하는 것이다. 그러나 의식의 흐름대로 예제를 진행하다보니
+s3 bucket 을 먼저 생성하여 사용하고 있었고, `already exists` 에러가 나는
+것이다.  걱정하지말자. **serverless** 는 plugin 을 통해 기본 툴이 지원해 주지
+않는 확장 기능들을 구현 하여 문제를 해결 할 수 있다.
+`serverless-plugin-existing-s3` 플러그인은 이런 `already exists` 문제를
+해결하기위해 개발된 플러그인이다. [플러그인의 README][existings3] 가이드를 따라
+`serverless.yml` 설정을 변경 하자.
 
+```diff
+$ git diff serverless.yml
+diff --git a/serverless.yml b/serverless.yml
+index aea67f8..59fcf5d 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -1,11 +1,16 @@
+ service: sls-hello-world
+
++plugins:
++  - serverless-plugin-existing-s3
++
+ package:
+   exclude:
+     - ./**
+   include:
+     - handler.js
+     - dynamicHelloHandler.js
++    - resizeHandler.js
++    - lib/imgUtil.js
+
+ provider:
+   name: aws
+@@ -18,6 +23,13 @@ provider:
+         - s3:PutObject
+         - s3:ListBucket
+       Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
++    - Effect: Allow
++      Action:
++        - s3:PutBucketNotification
++      Resource:
++        Fn::Join:
++          - ""
++          - - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
+   environment:
+     SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
+
+@@ -40,3 +52,13 @@ functions:
+       - http:
+           path: getS3Object/{key}
+           method: get
++  resize:
++    handler: resizeHandler.resize
++    events:
++      - existingS3:
++          bucket: ${env:SLS_BUCKET_NAME}
++          events:
++            - s3:ObjectCreated:*
++          rules:
++            - suffix: .png,jpg,jpeg
 ```
+
+플러그인을 설치하고 배포해보자:
+```sh
 $ yarn add serverless-plugin-existing-s3
+$ npx sls deploy --verbose
+$ npx sls s3deploy
 ```
 
-https://github.com/matt-filion/serverless-external-s3-event
+`deploy` 시 에러가 나지 않을 것이며, 추가로 `s3deploy` 를 수행할 때,
+`serverless-plugin-existing-s3` 플러그에서 S3 Bucket 에 `Notification` 설정을
+해준다.
 
+이미지 파일을 업로드하여 함수가 잘 호출되는지 테스트 해보자:
 ```
-plugins:
- - serverless-plugin-existing-s3
+$ aws cp example1.png s3://$SLS_BUCKET_NAME/
 ```
 
-// TODO
+CloudWatch 를 통해 `resize` 함수의 호출 로그를 확인해보면 위에서 언급 한 것과 같이
+ES6 스펙을 해석하지 못하여 아래와 같은 에러가 날 것이다.
 
+```sh
+Syntax error in module 'resizeHandler': SyntaxError
+import AWS from 'aws-sdk'
+^^^^^^
+
+SyntaxError: Unexpected token import
+at createScript (vm.js:80:10)
+at Object.runInThisContext (vm.js:139:10)
+at Module._compile (module.js:616:28)
+at Object.Module._extensions..js (module.js:663:10)
+at Module.load (module.js:565:32)
+at tryModuleLoad (module.js:505:12)
+at Function.Module._load (module.js:497:3)
+at Module.require (module.js:596:17)
+at require (internal/module.js:11:18)
+at Object.<anonymous> (/var/task/resizeHandler.js:2:17)
+```
+
+완벽하지 않기에 이번엔 브랜치를 따서 커밋을 하고 이 문제를 해결 한 뒤 `master`
+브랜치로 머지해보자.
+
+```sh
+$ git add .
+$ git stash
+$ git checkout -b dev/s3-object-created-event
+$ git stash pop
+$ git add .
+$ git commit -m "add serverless-plugin-existing-s3, add image resize function"
+```
 
 ## serverless-webpack
-위에서 `package` 설정을 했기 때문에 배포하게되면 여전히 handler.js 파일 하나만
-올라가게 되는 것을 볼 수 있다. 어떻게 해야 할까?
+`serverless-webpack` 플러그인이 필요한 이유는 다음과 같다.
 
-package 설정에 include 로 `imgUtil.js` 파일을 추가해주고, 이 파일에서 사용하는
-`gm` 이라는 모듈이 올라가도록 `node_modules/gm` 을 추가해주면 될까?  답부터
-말하자면 좋지 않은 방법이다. 파일이나 모듈을 하나 추가할 때마다 `serverless.yml`
-파일 package.include 에 설정을 하나씩 추가해야 하는 것은 굉장히 귀찮을 뿐만
-아니라 `gm` 모듈이 사용하는 sub dependencies 들이 모두 `node_modules/gm` 아래에
-설치된다는 보장도 없다. 다른 방법을 찾아야 하는데 그 해답은 `webpack` 이다.
+1. ES6 스펙을 사용하고 싶을 때
+2. 파일이 추가 될 때 마다 `package.include` 에 추가하는 것이 귀찮을 때
+3. npm 에서 내려받아 node_modules 아래 설치된 서드파티 모듈을 추가 해야 할 때
 
-webpack 은 브라우저에서 모던 javascript 코드를 돌리기 위한 bundling, minify 등의
-전처리를 해주는 툴인데, `nodejs` 환경에서도 사용 할 수 있으며, `gm` 모듈과 같은
-서드파티 모듈들을 실행가능한 단일 bundle 파일로 만들어주는 기능을 사용 할
-것이다. `serverless-webpack` plugin 을 사용하면 serverless 배포시 자동으로
-실행해주고 오프라인 개발환경까지 지원해준다.
+[webpack][webpack]은 ES6 와 같은 javascript 코드를 브라우저에서 실행 가능한
+파일로 transform 을 해주는 툴인데, 여기에는 번들링 작업이 포함된다. entry point
+파일로부터 이 파일이 로드하는 다른 파일들을 줄줄이 로드하여 단일 js 파일로
+만들어주는 것이다. browser 에서 실행되는 코드에 주로 사용하지만 `nodejs`
+환경에서도 사용 할 수 있으며, **serverless** 와 함께 실행시에는
+`serverless-webpack` 플러그인을 사용하면 `deploy` 시 자동으로 **webpack** 이
+실행되고 output js 번들 파일만이 업로드 된다.
 
 ```
 $ yarn add webpack serverless-webpack
-$ yarn add babel-loader babel-core babel-preset-env
+$ yarn add babel-preset-env babel-loader
 ```
 
 webpack 은 다음과 같은 `webpack.config.js` 설정 파일을 사용한다.
 
 ```js
+// webpack.config.js
+
 const path = require('path')
 const slsw = require('serverless-webpack')
-const _ = require('lodash')
 
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? "development" : "production",
-  entry: _.isEmpty(slsw.lib.entries) ? './handler.js' : slsw.lib.entries,
-  output: {
-    libraryTarget: 'commonjs',
-    path: path.resolve(__dirname, '.webpack'),
-    filename: 'handler.js',
-  },
+  entry: slsw.lib.entries,
+  target: 'node',
   module: {
     rules: [{
       test: /\.js$/,
       exclude: /node_modules/,
       loader: 'babel-loader',
-      options: {
-        presets: ['env'],
-      }
     }],
   },
-  target: 'node',
+  output: {
+    libraryTarget: 'commonjs',
+    path: path.join(__dirname, '.webpack'),
+    filename: '[name].js',
+  },
   externals: ['aws-sdk'],
 }
 ```
 
-test 해보자.
-```
-$ npx webpack
-Hash: b7e7a2496ea7f73e2ccc
-Version: webpack 4.16.1
-Time: 2378ms
-Built at: 2018-07-22 16:06:20
-     Asset    Size  Chunks             Chunk Names
-handler.js  61 KiB       0  [emitted]  main
-Entrypoint main = handler.js
- [0] external "fs" 42 bytes {0} [built]
- [2] external "path" 42 bytes {0} [built]
- [3] external "child_process" 42 bytes {0} [built]
- [4] external "util" 42 bytes {0} [built]
- [5] external "os" 42 bytes {0} [built]
- [6] external "aws-sdk" 42 bytes {0} [built]
- [7] external "stream" 42 bytes {0} [built]
-[13] ./src/handler.js 2.12 KiB {0} [built]
-[14] ./src/imgUtil.js 2 KiB {0} [built]
-[16] external "crypto" 42 bytes {0} [optional] [built]
-[18] external "events" 42 bytes {0} [built]
-[50] external "tty" 42 bytes {0} [built]
-    + 45 hidden modules
-```
+`aws-sdk` 는 Lambda 실행환경에서 제공되므로 번들링시 제외하기위해 `externals`
+에 추가하였다.  `serverless.yml` 에는 `serverless-webpack` 플러그인을 위한
+설정이 추가되어야 한다. `serverless-webpack` 을 사용하면 `package` 설정이
+무시되기 때문에 삭제해도 되며 Lambda function 의 timeout 을 기본 6초에서 15초로
+늘려 큰 이미지 변환시 timeout 으로 종료되지 않도록 처리하였다.
+```diff
+$ git diff serverless.yml
+diff --git a/serverless.yml b/serverless.yml
+index 8ab3bc7..84c94b5 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -2,20 +2,17 @@ service: sls-hello333
 
-좀 더 자세한 로그를 보고싶다면 `--display-modules` 옵션을 붙여서 다시한번
-실행해보자.  `fs` 같은 nodejs native library 들은 `external` 디펜던시로 처리되어
-함께 번들링 되지 않는다. 또한 `aws-sdk` 도 Lambda 실행환경에서 제공되기 때문에
-올릴 필요가 없어서 webpack 설정의 `externals` 설정으로 번들링을 제외시키는 것이
-좋다.
+ plugins:
+   - serverless-plugin-existing-s3
++  - serverless-webpack
 
-`serverless.yml` 에 `serverless-webpack` 설정을 해야한다.
+-package:
+-  exclude:
+-    - ./**
+-  include:
+-    - handler.js
+-    - dynamicHelloHandler.js
+-    - resizeHandler.js
+-    - lib/imgUtil.js
++custom:
++  webpack:
++    packager: yarn
 
-```yaml
-plugins:
-  - serverless-webpack
-
-custom:
-  webpack:
-    includeModules: false
-    webpackConfig: webpack.config.js
-    packager: yarn
+ provider:
+   name: aws
+   runtime: nodejs8.10
+   region: ${env:AWS_DEFAULT_REGION}
++  timeout: 15
+   iamRoleStatements:
+     - Effect: Allow
+       Action:
 ```
 
-이제 serverless deploy 하게 되면 자동으로 webpack 이 실행되며 번들링된 파일이
-패키징되어 upload 된다.
+배포해보자:
+```sh
+$ npx sls deploy --verbose
+Serverless: Using configuration:
+{
+  "packager": "yarn",
+  "webpackConfig": "webpack.config.js",
+  "includeModules": false,
+  "packagerOptions": {}
+}
+Serverless: Removing /Users/ssohjiro/project-poc/sls-hello333/.webpack
+Serverless: Bundling with Webpack...
+Time: 694ms
+Built at: 2018-09-05 15:20:45
+                 Asset      Size  Chunks             Chunk Names
+            handler.js  1.12 KiB       0  [emitted]  handler
+dynamicHelloHandler.js  1.62 KiB       1  [emitted]  dynamicHelloHandler
+      resizeHandler.js  57.3 KiB       2  [emitted]  resizeHandler
+Entrypoint handler = handler.js
+Entrypoint dynamicHelloHandler = dynamicHelloHandler.js
+Entrypoint resizeHandler = resizeHandler.js
+ [0] external "fs" 42 bytes {2} [built]
+ [1] external "path" 42 bytes {2} [built]
+ [2] ./node_modules/gm/lib/utils.js 776 bytes {2} [built]
+ [3] external "aws-sdk" 42 bytes {1} {2} [built]
+ [4] external "util" 42 bytes {2} [built]
+[12] ./node_modules/gm/lib/compare.js 3.76 KiB {2} [built]
+[13] ./node_modules/gm/index.js 2.95 KiB {2} [built]
+[14] ./handler.js 408 bytes {0} [built]
+[15] ./dynamicHelloHandler.js 1.01 KiB {1} [built]
+[16] ./resizeHandler.js 1.23 KiB {2} [built]
+[17] ./lib/imgUtil.js 981 bytes {2} [built]
+[22] ./node_modules/gm/lib/drawing.js 4.16 KiB {2} [built]
+[23] ./node_modules/gm/lib/convenience.js 233 bytes {2} [built]
+[29] ./node_modules/gm/lib/command.js 10.7 KiB {2} [built]
+[54] ./node_modules/gm/package.json 943 bytes {2} [built]
+    + 40 hidden modules
 
+WARNING in ./node_modules/spawn-sync/lib/spawn-sync.js
+Module not found: Error: Can't resolve 'try-thread-sleep' in '/Users/ssohjiro/project-poc/sls-hello333/node_modules/spawn-sync/lib'
+ @ ./node_modules/spawn-sync/lib/spawn-sync.js
+ @ ./node_modules/spawn-sync/index.js
+ @ ./node_modules/cross-spawn/index.js
+ @ ./node_modules/gm/lib/compare.js
+ @ ./node_modules/gm/index.js
+ @ ./lib/imgUtil.js
+ @ ./resizeHandler.js
+Serverless: Zip service: /Users/ssohjiro/project-poc/sls-hello333/.webpack/service [18 ms]
+Serverless: Packaging service...
+Serverless: Remove /Users/ssohjiro/project-poc/sls-hello333/.webpack
+Serverless: Uploading CloudFormation file to S3...
+Serverless: Uploading artifacts...
+Serverless: Uploading service .zip file to S3 (23.38 KB)...
+Serverless: Validating template...
+Serverless: Updating Stack...
+Serverless: Checking Stack update progress...
 ```
-$ npx sls deploy -v
+
+test 해보자:
+```sh
+$ s3 cp some-image.jpg s3://$SLS_BUCKET_NAME/images/
+$ s3 cp s3://$SLS_BUCKET_NAME/resize/some-image.jpg .
+$ open some-image.jpg
 ```
 
-에러 없이 배포와 실행이 잘 되었다면 AWS Web Console 을 통해 `resize` prefix 아래
-resize 된 파일이 생성되었는지 확인하자.
+에러 없이 배포와 실행이 잘 되었다면 커밋 한뒤 master 에 merge 하자.
+```sh
+$ git add .
+$ git commit -m "apply serverless-webpack"
+$ git checkout master
+$ git merge --no-ff dev/s3-object-created-event
+$ git branch -d dev/s3-object-created-event
+$ git log --oneline --graph
+*   e2ef42d (HEAD -> master) Merge branch 'dev/s3-object-created-event'
+|\
+| * 1d86de6 apply serverless-webpack
+| * d85d735 add serverless-plugin-existing-s3, image resize function
+|/
+* e907897 add getS3Object for s3 access example
+* e81e669 will squash. remove rest commment
+* 88a4b3e add http event
+* 9d97ea3 add package setting
+* 1958b75 add dynamicHello
+* 4a5eb17 update .gitignore, remove comment in serverless.yml, add js-yaml
+* 4050575 initial commit
+```
 
+# SNS
+호출된 모든 Lambda function 은 두 번 재시도한 뒤에 해당 이벤트를 무시하게
+되는데 이때 [DLQ(Dead Letter Queue)][dlq]를 사용하여 처리되지 않은 이벤트를
+Amazon SQS 또는 Amazon SNS 로 보내 결함을 분석해 볼 수 있다. **serverless**
+에서도 각 함수 아래 `onError` 설정을 추가하여 사용 할 수 있다.
 
+sns-topic 을 생성하고 `serverless.yml` 에 `onError` 를 추가해보자.
+```
+$ aws sns create-topic --region $AWS_DEFAULT_REGION --name test223
+{
+    "TopicArn": "arn:aws:sns:ap-southeast-1:666252830126:test223"
+}
+```
+
+SNS ARN 역시 환경변수로 따로 관리하는 것이 바람직하다.
+```
+# .envrc
+
+export SLS_SNS_TOPIC_ARN=arn:aws:sns:ap-southeast-1:666252830126:test223
+```
+
+테스트 할 구독자를 추가하자:
+```
+$ source .envrc
+$ aws sns subscribe --topic-arn $SLS_SNS_TOPIC_ARN --protocol sms --notification-endpoint '+821012341234'
+$ aws sns subscribe --topic-arn $SLS_SNS_TOPIC_ARN --protocol email --notification-endpoint me@aluc.io
+$ ...
+```
+
+`serverless.yml` 에 onError 를 추가하자
+```diff
+   resize:
+     handler: resizeHandler.resize
++    onError: ${env:SLS_SNS_TOPIC_ARN}
+     events:
+       - existingS3:
+           bucket: ${env:SLS_BUCKET_NAME}
+```
+
+SNS 메시지로 기본적으로 event 객체의 내용이 전달된다. 이 메시지로부터 로그를
+찾아 갈 수 있도록 종료전 event 객체를 출력하는 코드를 추가하자.
+```diff
+$ git diff resizeHandler.js
+diff --git a/resizeHandler.js b/resizeHandler.js
+index 20059b6..68c02f5 100644
+--- a/resizeHandler.js
++++ b/resizeHandler.js
+@@ -38,6 +38,7 @@ module.exports.resize = (event, context, callback) => {
+     callback(null, { statusCode: 200, body: JSON.stringify(data,null,2) })
+
+   }).catch( err => {
+-    callback(err)
++    console.log(event)
++    console.log(err)
+   })
+ }
+```
+
+배포한 후 `images/` 경로에 텍스트 파일을 올려 이미지 변환시 에러가 발생하도록
+하고 SNS 노티가 잘 전송되는지 확인하자:
+```sh
+$ source .envrc
+$ npx sls deploy --verbose
+$ aws s3 cp webpack.config.js s3://$SLS_BUCKET_NAME/images/
+```
+
+Lambda function 의 내부 동작에 의해 에러 발생 시 2번 재시도 된 후 노티가 온다.
+노티가 잘 온다면 커밋하고 넘어가자:
+
+```sh
+$ git add serverless.yml resizeHandler.js
+$ git commit -m "apply SNS Notification by onError"
+```
+
+# S3 Rekognition
+**serverless** 가 좋은 점은 [수 많은 example][examples] 들이 있기 때문이다. AI
+로 이미지를 분석해주는 AWS 서비스인 AWS Rekognition 을 [예제][rek_example]를
+참고하여 구현해보자.
+
+먼저 github 저장소에 있는 lib/imageAnalyser.js `lib` 디렉토리로 내려받자.
+```sh
+$ wget --directory-prefix lib https://raw.githubusercontent.com/serverless/examples/92631fd709d603e295aa8f352937cce53ca24080/aws-node-rekognition-analysis-s3-image/lib/imageAnalyser.js
+```
+
+위 파일을 로드하여 사용할 랜들러 파일 `imageAnalyserHandler.js` 를 작성하자.
+```js
+// imageAnalyserHandler.js
+
+const path = require('path')
+
+const ImageAnalyser = require('./lib/imageAnalyser')
+const bucket = process.env.SLS_BUCKET_NAME
+
+module.exports.imageAnalysis = (event, context, callback) => {
+  const imageName = path.join('images', event.pathParameters.key)
+  console.log( 'Key: ' + imageName )
+  ImageAnalyser.getImageLabels({ bucket, imageName })
+  .then((Labels) => {
+    const response = { statusCode: 200, body: JSON.stringify({ Labels }) }
+    callback(null, response)
+
+  }).catch((error) => {
+    callback(error, null)
+  })
+}
+```
+
+`serverless.yml` 파일에 핸들러 설정과 iamRole 권한 설정을 추가하자.
+```diff
+$ git diff serverless.yml
+diff --git a/serverless.yml b/serverless.yml
+index f2f1220..549e9e0 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -27,6 +27,11 @@ provider:
+         Fn::Join:
+           - ""
+           - - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
++    - Effect: Allow
++      Action:
++        - "rekognition:*"
++      Resource: "*"
++
+   environment:
+     SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
+
+@@ -59,4 +64,10 @@ functions:
+             - s3:ObjectCreated:*
+           rules:
+             - prefix: images/
++  imageAnalysis:
++    handler: imageAnalyserHandler.imageAnalysis
++    events:
++      - http:
++          path: "/analysis/{key}"
++          method: get
+```
 
 # react
-마지막으로 지금까지 만든 기능들을 Web UI 로 만들어보자.  react 를 사용할 것인데
-webpack 을 이미 적용했기 때문에 server side 렌더링을 위한 코드만 몇 줄 적으면
-react 로 만든 웹 페이지도 어렵지 않게 추가 할 수 있다.
+~~비용 문제가 있을 뿐~~ Lambda function 의 한계는 없다. 마지막으로 **resize**,
+**Rekognition** 기능을 확인하는 Web UI 를 제공해보자. webpack 을 이미 적용했기
+때문에 `@babel/preset-react` 를 추가하여 어렵지 않게 `react` 도 도입을 할 수
+있다.
 
-```
-$ yarn add react react-dom babel-preset-react
+```sh
+$ yarn add react react-dom styled-jsx @babel/preset-react
 ```
 
 ```js
-// App.js
+// lib/App.js
+
+import React from 'react'
+
+const Item = props =>
+  <a href={props.detailLink}>
+    <li>
+      <img src={props.resizeUrl}/>
+      <span>{props.filename}</span>
+    </li>
+  </a>
+
+export default ({ objectList }) =>
+  <React.Fragment>
+    <ul>{objectList.map( o => <Item {...o} key={o.filename}/> )}</ul>
+    <style jsx>{`
+      li { margin: 10px; width: 160px; border: 1px solid red; float: left; }
+      img { width: 100%; }
+    `}</style>
+  </React.Fragment>
 ```
 
-html 페이지를 내려주는 Labmda Function 하나를 더 만들어 보자.
+html 페이지를 내려주는 `htmlHandler.js` 를 추가하자.
 
-```yml
+```js
+// htmlHandler.js
 
+import path from 'path'
+
+import AWS from 'aws-sdk'
+import React from 'react'
+import compact from 'lodash/compact'
+import find from 'lodash/find'
+import { renderToString } from 'react-dom/server'
+import { flushToHTML } from 'styled-jsx/server'
+
+import App from './lib/App'
+
+const s3 = new AWS.S3()
+const Bucket = process.env.SLS_BUCKET_NAME
+
+Error.stackTraceLimit = 50
+const headers = { 'Content-Type': 'text/html; charset=utf-8' }
+
+export const html = (event, context, callback) => {
+  s3.listObjects({ Bucket, Prefix: 'images/' }).promise()
+  .then( data => {
+    let objectList = data.Contents.map( ({ Key }) => {
+      if( Key === 'images/' ) return null
+
+      const filename = path.basename(Key)
+      const resizeKey = path.join('resize',filename)
+      const resizeUrl = s3.getSignedUrl('getObject', { Bucket, Key: resizeKey})
+      const detailLink = `/dev/imageDetail/${filename}`
+      return { filename, resizeUrl, detailLink }
+    })
+    objectList = compact(objectList)
+
+    const html = renderToString(<App objectList={objectList}/>)
+    const styledJsx = flushToHTML()
+    const body = renderFullPage( html, styledJsx, { objectList })
+
+    callback(null, { headers, statusCode: 200, body })
+  }).catch( err => {
+    console.log( 'err: ')
+    console.log( err )
+    callback( err )
+  })
+}
+
+const renderFullPage = (html, styledJsx, props) => `
+<!doctype html>
+<html>
+  <head>
+    <meta charSet="utf-8" />
+    <title>serverless react example</title>
+    ${styledJsx}
+  </head>
+  <body>
+    <div id="root">${html}</div>
+    <script>
+      window.__PRELOADED_STATE__ = JSON.parse(${JSON.stringify(props).replace(/</g, '\\u003c')})
+    </script>
+  </body>
+</html>
 ```
 
-s3 에 있는 이미지 파일들은 s3 버킷이 public 설정이 되어있지 않는 한 접근 할 수
-없다. 하지만 public 설정은 보안에 취약하고 presigned url 을 통해 내려주자.
+`serverless.yml` 에 function 을 추가하자.
 
-# SNS
-마지막으로 serverless 설정 몇줄을 추가하여 Lambda Function 에 에러가 있을때
-AWS SNS 를 통해 알림을 받도록 추가해보자.
+```diff
+$ git diff serverless.yml
+diff --git a/serverless.yml b/serverless.yml
+index 549e9e0..80ad835 100644
+--- a/serverless.yml
++++ b/serverless.yml
+@@ -18,8 +18,10 @@ provider:
+       Action:
+         - s3:GetObject
+         - s3:PutObject
+         - s3:ListBucket
+-      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
++      Resource:
++        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
++        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
+     - Effect: Allow
+       Action:
+         - s3:PutBucketNotification
+@@ -70,4 +72,9 @@ functions:
+       - http:
+           path: "/analysis/{key}"
+           method: get
+-
++  html:
++    handler: htmlHandler.html
++    events:
++      - http:
++          path: /
++          method: get
+```
 
+`react` 의 `jsx` 문법을 사용할 수 있도록 `webpack` 에 설정을 추가하자:
+```diff
+$ git diff webpack.config.js
+diff --git a/webpack.config.js b/webpack.config.js
+index c076854..6dfaed3 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -11,7 +11,12 @@ module.exports = {
+     rules: [{
+       test: /\.js$/,
+       exclude: /node_modules/,
+-      loader: 'babel-loader',
++      use: [{
++        loader: 'babel-loader',
++        options: {
++          presets: ['@babel/react'],
++        },
++      }],
+     }],
+   },
+   output: {
+```
 
+# 그 외 기능
+- Lambda function 은 VPC 에 속할 수 있다.
+    - Security Group 도 설정 가능
+    - NAT 를 사용하여 public IP 고정 가능
+    - VPC 내 자원들과 private IP 로 통신 가능
+- https://www.npmjs.com/package/serverless-aws-alias
+- https://github.com/FidelLimited/serverless-plugin-warmup
 
 # References
 
-- [pets-cattle-and-nowinsects][petcattleinsect]: Stateful 자원을 **Pets**,
-Stateless 자원을 **Cattle**, Serverless 자원을 **Insects** 에 비유하여 설명한
-글이다.
-- 
+- https://blog.rackspace.com/pets-cattle-and-nowinsects
+- https://www.slideshare.net/awskorea/aws-lambda-100-sangpil-kim
+- https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
+- https://github.com/mgi166/serverless-image-resizer/blob/master/src/imageResizer.js
+- https://brunch.co.kr/@tigeryoonz/16
+- http://www.ohmynews.com/NWS_Web/View/at_pg.aspx?CNTN_CD=A0002145647
+- https://blog.epsagon.com/how-to-handle-aws-lambda-errors-like-a-pro
+- https://medium.com/buildit/a-b-testing-on-aws-cloudfront-with-lambda-edge-a22dd82e9d12
+- https://dev.to/didil/serverless-testing-strategies-4g92
 
 [serverless]: https://serverless.com/
 [serverless_framework]: https://serverless.com/framework/
@@ -1140,7 +1611,6 @@ Stateless 자원을 **Cattle**, Serverless 자원을 **Insects** 에 비유하�
 [sls_package]: https://www.npmjs.com/package/serverless
 [webconsole_lambda]: https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions
 [webconsole_cloudwatch]: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:
-[petcattleinsect]: https://blog.rackspace.com/pets-cattle-and-nowinsects
 [velopert_lambda]: https://velopert.com/3546
 [aws_lambda]: https://aws.amazon.com/ko/lambda/?nc1=h_ls
 [aws_apigateway]: https://aws.amazon.com/ko/api-gateway/?nc1=h_ls
@@ -1149,11 +1619,10 @@ Stateless 자원을 **Cattle**, Serverless 자원을 **Insects** 에 비유하�
 [yarn]: https://yarnpkg.com/en/
 [npm]: https://www.npmjs.com/
 [async]: https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/async_function
-https://www.slideshare.net/awskorea/aws-lambda-100-sangpil-kim
-https://serverless.com/framework/docs/providers/aws/guide/deploying#how-it-works
-https://github.com/serverless/examples
-https://github.com/mgi166/serverless-image-resizer/blob/master/src/imageResizer.js
+[existings3]: https://github.com/matt-filion/serverless-external-s3-event
+[webpack]: https://webpack.js.org/
+[serverless_event]: https://serverless.com/framework/docs/providers/aws/events/
+[dlq]: https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/dlq.html
+[examples]: https://github.com/serverless/examples
+[rek_example]: https://github.com/serverless/examples/tree/master/aws-node-rekognition-analysis-s3-image
 
-https://brunch.co.kr/@tigeryoonz/16
-http://www.ohmynews.com/NWS_Web/View/at_pg.aspx?CNTN_CD=A0002145647
-https://blog.rackspace.com/pets-cattle-and-nowinsects
