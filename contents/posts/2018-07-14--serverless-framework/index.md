@@ -26,7 +26,7 @@ published: true
 On-premise 환경에서의 서버 설비투자 비용과 프로비저닝 시간을 고려하면 가능한
 하나의 서버를 오래 사용하는 계획을 세워야한다. 서버에 문제가 생기면 큰 비용이
 들더라도 고쳐야하며 그렇기 때문에 서버에서 뭔가를 할 땐 그 환경에 익숙한 전문
-인력의 섬세한 작업이 필요하다. 이러다 보니 각각의 서버들에 이름이 붙여서 관리
+인력의 섬세한 작업이 필요하다. 이러다 보니 각각의 서버들에 이름을 붙여서 관리
 한다. A-Service-Web, B-Service-WAS, DB, Firewall Server 등. 이러한 서버들의
 이름과 특징들을 **상태** 라고 하며 상태 관리가 필요한 자원을 **Stateful**
 자원이라 한다.
@@ -54,7 +54,7 @@ Lambda][aws_lambda] 이다. Lambda 를 트리거 하는 이벤트가 발생하�
 
 **Insects** 의 장점은 **Serverless** 이다. 사실 서버는 어딘가에 있지만 AWS 와
 같은 클라우드 벤더사에서 서버를 관리해줘서 개발/운영자가 관리할 서버가 없다는
-의미이다.
+의미이며 애플리케이션 코드만 관리하여 서비스를 구성 할 수 있다.
 
 
 # Serverless Architecture
@@ -111,7 +111,7 @@ total 16
 
 `npx <command>` 를 실행하면 아래 우선순위대로 패키지를 찾아 실행시킨다.
 
-1. 현재 디렉토리 아래에 있는 `node_modules/bin` 디렉토리에서 패키지를 찾는다.
+1. 현재 디렉토리 아래에 있는 `node_modules/.bin` 디렉토리에서 패키지를 찾는다.
 1. global 영역의 `bin` 디렉토리에서 패키지를 찾는다 (예:
    `~/.nvm/versions/node/v8.9.4/bin`)
 1. 상위 디렉토리의 `node_modules/bin` 안의 패키지를 찾는다. 상위 디렉토리로
@@ -382,9 +382,9 @@ module.exports.hello = (event, context, callback) => {
     },
     body: `
       <h1>hello ${count++}th 방문자님!!</h1>
-      <h3>context.awsRequestId: ${context.awsRequestId}</h3>
-      <h3>context.awsRequestId: ${context.awsRequestId}</h3>
+      <h3>context.logGroupName ${context.logGroupName}</h3>
       <h3>context.logStreamName: ${context.logStreamName}</h3>
+      <h3>context.awsRequestId: ${context.awsRequestId}</h3>
     `,
   }
   callback(null, response)
@@ -710,7 +710,9 @@ Execution role 설정으로 Lambda function 이 실행될 때 사용하는 IAM R
 +        - s3:GetObject
 +        - s3:PutObject
 +        - s3:ListBucket
-+      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
++      Resource:
++        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
++        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 ```
 
 ## serverless.yml 설정에서 환경변수 사용하기
@@ -740,6 +742,7 @@ nodejs 라이브러리인 [aws-sdk][aws_sdk_js] 를 사용하여 s3 버킷을 �
 ```sh
 $ source .envrc
 $ aws s3api create-bucket --bucket $SLS_BUCKET_NAME --region $AWS_DEFAULT_REGION
+$ # aws s3api create-bucket --bucket $SLS_BUCKET_NAME --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
 {
     "Location": "http://sls-hello-world-293874131.s3.amazonaws.com/"
 }
@@ -867,6 +870,7 @@ npm 을 통해 설치한 서드파티 모듈을 사용하는 Lambda Function 을
 import AWS from 'aws-sdk'
 import path from 'path'
 import fs from 'fs'
+
 import _gm from 'gm'
 
 const gm = _gm.subClass({ imageMagick: true })
@@ -903,31 +907,27 @@ export const resizeImage = (info, size) => new Promise((resolve, reject) => {
 // resizeHandler.js
 
 const path = require('path')
-
 const AWS = require('aws-sdk')
+
 const imgUtil = require('./lib/imgUtil')
 
 const Bucket = process.env.SLS_BUCKET_NAME
-const downloadImage = imgUtil.downloadImage
-const getImageInfo = imgUtil.getImageInfo
-const resizeImage = imgUtil.resizeImage
 const s3 = new AWS.S3()
 
 module.exports.resize = (event, context, callback) => {
-
   const originalKey = event.Records[0].s3.object.key
   console.log('originalKey: ' + originalKey)
 
   let imgInfo
-  downloadImage( Bucket, originalKey ).then( imgPath => {
+  imgUtil.downloadImage( Bucket, originalKey ).then( imgPath => {
     console.log( `imgPath: ${imgPath}` )
-    return getImageInfo( imgPath )
+    return imgUtil.getImageInfo( imgPath )
 
   }).then( _imgInfo => {
     imgInfo = _imgInfo
     console.log( 'imgInfo: ' )
     console.log( JSON.stringify(imgInfo,null,2) )
-    return resizeImage(imgInfo, '160x120')
+    return imgUtil.resizeImage(imgInfo, '160x120')
 
   }).then( buffer => {
     const Key = path.join('resize', path.basename(originalKey))
@@ -946,7 +946,7 @@ module.exports.resize = (event, context, callback) => {
 ```
 
 S3 에 이미지가 업로드되면 `resize` 함수가 호출되어 이미지를 먼저 다운 받고
-`320x240` 로 리사이즈 한 뒤 리사이즈된 이미지를 S3 버킷 `resize/` prefix 에
+`160*120` 로 리사이즈 한 뒤 리사이즈된 이미지를 S3 버킷 `resize/` prefix 에
 업로드 하는 예제이다.
 
 ## S3 ObjectCreated event
@@ -979,7 +979,7 @@ index 747017c..f6fa169 100644
 +          bucket: ${env:SLS_BUCKET_NAME}
 +          event: s3:ObjectCreated:*
 +          rules:
-+            - suffix: .png,jpg,jpeg
++            - prefix: images/
 ```
 
 배포해보자.
@@ -1133,9 +1133,9 @@ $ git commit -m "add serverless-plugin-existing-s3, add image resize function"
 `serverless-webpack` 플러그인을 사용하면 `deploy` 시 자동으로 **webpack** 이
 실행되고 output js 번들 파일만이 업로드 된다.
 
-```
+```sh
 $ yarn add webpack serverless-webpack
-$ yarn add babel-preset-env babel-loader
+$ yarn add @babel/core babel-loader
 ```
 
 webpack 은 다음과 같은 `webpack.config.js` 설정 파일을 사용한다.
@@ -1463,6 +1463,19 @@ export default ({ objectList }) =>
   </React.Fragment>
 ```
 
+```js
+// lib/ImageDetail.js
+
+import React from 'react'
+
+export default ( props ) =>
+  <div>
+    <pre>{JSON.stringify(props.labels,null,2)}</pre>
+    <img src={props.originalUrl}/>
+    <style jsx>{`img { margin: 10px; width: 100%; }`}</style>
+  </div>
+```
+
 html 페이지를 내려주는 `htmlHandler.js` 를 추가하자.
 
 ```js
@@ -1478,6 +1491,8 @@ import { renderToString } from 'react-dom/server'
 import { flushToHTML } from 'styled-jsx/server'
 
 import App from './lib/App'
+import ImageDetail from './lib/ImageDetail'
+const ImageAnalyser = require('./lib/imageAnalyser')
 
 const s3 = new AWS.S3()
 const Bucket = process.env.SLS_BUCKET_NAME
@@ -1485,7 +1500,7 @@ const Bucket = process.env.SLS_BUCKET_NAME
 Error.stackTraceLimit = 50
 const headers = { 'Content-Type': 'text/html; charset=utf-8' }
 
-export const html = (event, context, callback) => {
+export const index = (event, context, callback) => {
   s3.listObjects({ Bucket, Prefix: 'images/' }).promise()
   .then( data => {
     let objectList = data.Contents.map( ({ Key }) => {
@@ -1511,6 +1526,25 @@ export const html = (event, context, callback) => {
   })
 }
 
+export const imageDetail = (event, context, callback) => {
+  const Key = path.join('images',event.pathParameters.key)
+  ImageAnalyser.getImageLabels({ bucket: Bucket, imageName: Key })
+  .then( Labels => {
+    const originalUrl = s3.getSignedUrl('getObject', { Bucket, Key })
+    const props = { labels: Labels, originalUrl }
+    const html = renderToString(<ImageDetail {...props}/>)
+    const styledJsx = flushToHTML()
+    const body = renderFullPage( html, styledJsx, props )
+
+    callback(null, { headers, statusCode: 200, body })
+  })
+  .catch((error) => {
+    console.log( 'err: ')
+    console.log( err )
+    callback( err )
+  })
+}
+
 const renderFullPage = (html, styledJsx, props) => `
 <!doctype html>
 <html>
@@ -1526,6 +1560,7 @@ const renderFullPage = (html, styledJsx, props) => `
     </script>
   </body>
 </html>
+`
 ```
 
 `serverless.yml` 에 function 을 추가하자.
@@ -1533,31 +1568,24 @@ const renderFullPage = (html, styledJsx, props) => `
 ```diff
 $ git diff serverless.yml
 diff --git a/serverless.yml b/serverless.yml
-index 549e9e0..80ad835 100644
+index 347e67d..b018a69 100644
 --- a/serverless.yml
 +++ b/serverless.yml
-@@ -18,8 +18,10 @@ provider:
-       Action:
-         - s3:GetObject
-         - s3:PutObject
-         - s3:ListBucket
--      Resource: "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
-+      Resource:
-+        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
-+        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
-     - Effect: Allow
-       Action:
-         - s3:PutBucketNotification
-@@ -70,4 +72,9 @@ functions:
+@@ -72,4 +72,10 @@ functions:
        - http:
-           path: "/analysis/{key}"
+           path: analysis/{key}
            method: get
--
-+  html:
-+    handler: htmlHandler.html
++  index:
++    handler: htmlHandler.index
 +    events:
 +      - http:
 +          path: /
++          method: get
++  imageDetail:
++    handler: htmlHandler.imageDetail
++    events:
++      - http:
++          path: imageDetail/{key}
 +          method: get
 ```
 
