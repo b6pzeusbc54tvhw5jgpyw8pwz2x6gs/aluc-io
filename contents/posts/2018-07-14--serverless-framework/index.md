@@ -1177,7 +1177,7 @@ diff --git a/serverless.yml b/serverless.yml
 index 8ab3bc7..84c94b5 100644
 --- a/serverless.yml
 +++ b/serverless.yml
-@@ -2,20 +2,17 @@ service: sls-hello333
+@@ -2,20 +2,17 @@ service: sls-hello-world
 
  plugins:
    - serverless-plugin-existing-s3
@@ -1215,7 +1215,7 @@ Serverless: Using configuration:
   "includeModules": false,
   "packagerOptions": {}
 }
-Serverless: Removing /Users/ssohjiro/project-poc/sls-hello333/.webpack
+Serverless: Removing /Users/ssohjiro/project-poc/sls-hello-world/.webpack
 Serverless: Bundling with Webpack...
 Time: 694ms
 Built at: 2018-09-05 15:20:45
@@ -1244,7 +1244,7 @@ Entrypoint resizeHandler = resizeHandler.js
     + 40 hidden modules
 
 WARNING in ./node_modules/spawn-sync/lib/spawn-sync.js
-Module not found: Error: Can't resolve 'try-thread-sleep' in '/Users/ssohjiro/project-poc/sls-hello333/node_modules/spawn-sync/lib'
+Module not found: Error: Can't resolve 'try-thread-sleep' in '/Users/ssohjiro/project-poc/sls-hello-world/node_modules/spawn-sync/lib'
  @ ./node_modules/spawn-sync/lib/spawn-sync.js
  @ ./node_modules/spawn-sync/index.js
  @ ./node_modules/cross-spawn/index.js
@@ -1252,9 +1252,9 @@ Module not found: Error: Can't resolve 'try-thread-sleep' in '/Users/ssohjiro/pr
  @ ./node_modules/gm/index.js
  @ ./lib/imgUtil.js
  @ ./resizeHandler.js
-Serverless: Zip service: /Users/ssohjiro/project-poc/sls-hello333/.webpack/service [18 ms]
+Serverless: Zip service: /Users/ssohjiro/project-poc/sls-hello-world/.webpack/service [18 ms]
 Serverless: Packaging service...
-Serverless: Remove /Users/ssohjiro/project-poc/sls-hello333/.webpack
+Serverless: Remove /Users/ssohjiro/project-poc/sls-hello-world/.webpack
 Serverless: Uploading CloudFormation file to S3...
 Serverless: Uploading artifacts...
 Serverless: Uploading service .zip file to S3 (23.38 KB)...
@@ -1584,11 +1584,17 @@ index c076854..6dfaed3 100644
    output: {
 ```
 
-# 그 외 기능
+# 그 외
+- [Per Stage Profiles][stage]
+- [Reference Variables using SSM Parameter Store][ssm]
+- Lambda@Edge
+    - https://aws.amazon.com/ko/lambda/edge/?nc1=h_ls
+    - https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/lambda-edge.html
 - Lambda function 은 VPC 에 속할 수 있다.
     - Security Group 도 설정 가능
     - NAT 를 사용하여 public IP 고정 가능
     - VPC 내 자원들과 private IP 로 통신 가능
+- https://github.com/dherault/serverless-offline
 - https://www.npmjs.com/package/serverless-aws-alias
 - https://github.com/FidelLimited/serverless-plugin-warmup
 
@@ -1625,4 +1631,6 @@ index c076854..6dfaed3 100644
 [dlq]: https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/dlq.html
 [examples]: https://github.com/serverless/examples
 [rek_example]: https://github.com/serverless/examples/tree/master/aws-node-rekognition-analysis-s3-image
+[stage]: https://serverless.com/framework/docs/providers/aws/guide/credentials#per-stage-profiles
+[ssm]: https://serverless.com/framework/docs/providers/aws/guide/variables#reference-variables-using-the-ssm-parameter-store
 
