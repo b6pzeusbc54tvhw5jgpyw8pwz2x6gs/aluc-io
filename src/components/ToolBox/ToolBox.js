@@ -1,6 +1,5 @@
 import { Link } from 'gatsby'
 import { connect } from "react-redux"
-import { withRouter } from 'react-router-dom'
 import DeveloperBoard from 'react-icons/lib/md/developer-board'
 import Home from 'react-icons/lib/fa/home'
 import PropTypes from "prop-types"
@@ -88,4 +87,4 @@ const mapStateToProps = (state, ownProps) => ({
   showLayout: state.layout.showLayout,
 })
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ToolBox))
+export default connect(mapStateToProps, mapDispatchToProps)(ToolBox)

@@ -3,7 +3,6 @@ import { connect } from "react-redux"
 import Avatar from "@material-ui/core/Avatar"
 import PropTypes from "prop-types"
 import React from "react"
-import { withRouter } from "react-router"
 import cx from "classnames"
 
 import { isWideScreenSelector } from '_src/selectors/layout'
@@ -111,10 +110,7 @@ const LayoutHeader = props => {
 
 LayoutHeader.propTypes = {
   config: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
-
   showLayout: PropTypes.bool.isRequired,
 }
 
@@ -126,4 +122,4 @@ const mapStateToProps = (state, ownProps) => ({
   //categoryFilter: state.categoryFilter,
 })
 
-export default withRouter(connect(mapStateToProps)(LayoutHeader))
+export default connect(mapStateToProps)(LayoutHeader)

@@ -1,8 +1,5 @@
 import React from "react"
-import { Router } from "react-router-dom"
 import { Provider } from "react-redux"
-
-import PropTypes from "prop-types"
 
 import createStore from "./src/store"
 
@@ -14,18 +11,15 @@ export const onInitialClientRender = () => {
   ssStyles && ssStyles.parentNode.removeChild(ssStyles)
 }
 
-export const replaceRouterComponent = ({ history }) => {
+export const wrapRootElement = ({ element }) => {
   const store = createStore()
   window.__store = store
 
-  const ConnectedRouterWrapper = ({ children }) =>
+  const ConnectedRootElement = (
     <Provider store={store}>
-      <Router history={history}>{children}</Router>
+      {element}
     </Provider>
+  )
 
-  ConnectedRouterWrapper.propTypes = {
-    children: PropTypes.object.isRequired
-  }
-
-  return ConnectedRouterWrapper
+  return ConnectedRootElement
 }

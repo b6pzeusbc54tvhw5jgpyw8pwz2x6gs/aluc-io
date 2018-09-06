@@ -13,11 +13,12 @@ import config from '_config/meta'
 class SearchPage extends React.Component {
   render() {
     const siteMetadata = get(this.props, 'data.site.siteMetadata')
+    const { location } = this.props
 
     return (
-      <Layout location={this.props.location}>
+      <Layout location={location}>
         <Seo config={config}/>
-        <LayoutHeader config={config}/>
+        <LayoutHeader location={location} config={config}/>
         <Search siteMetadata={siteMetadata} />
       </Layout>
     )

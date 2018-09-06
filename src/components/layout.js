@@ -1,4 +1,3 @@
-import { Link } from 'gatsby'
 import { connect } from "react-redux"
 import PropTypes from "prop-types"
 import React from 'react'
@@ -27,8 +26,8 @@ class Layout extends React.Component {
 
   render() {
     const { location, children } = this.props
-    const rootPath = `${__PATH_PREFIX__}/`
-    let header
+    // const rootPath = `${__PATH_PREFIX__}/`
+    // let header
 
     return (
       <div
@@ -39,7 +38,7 @@ class Layout extends React.Component {
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >
-        <ToolBox />
+        <ToolBox location={location}/>
         {children}
       </div>
     )
@@ -52,6 +51,7 @@ Layout.propTypes = {
     PropTypes.array,
   ]).isRequired,
   setWindowSize: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
   //fontSizeIncrease: PropTypes.number.isRequired,
   //setFontSizeIncrease: PropTypes.func.isRequired,
 }

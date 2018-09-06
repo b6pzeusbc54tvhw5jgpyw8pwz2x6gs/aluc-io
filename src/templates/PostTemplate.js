@@ -19,14 +19,13 @@ import LayoutHeader from '_src/components/LayoutHeader'
 class PostTemplate extends React.Component {
 
   render() {
-    const { data, pathContext } = this.props
+    const { location, data, pathContext } = this.props
     const tableOfContents = data.post.tableOfContents
     const facebook = (((data || {}).site || {}).siteMetadata || {}).facebook
-    const { location } = this.props
 
     return (
       <Layout location={location}>
-        { !/\/pages\/1--about\/?$/.test(location.pathname)  && <LayoutHeader config={config}/>}
+        { !/\/pages\/1--about\/?$/.test(location.pathname)  && <LayoutHeader location={location} config={config}/>}
         <Article>
           <Post
             location={location}
@@ -49,9 +48,7 @@ PostTemplate.propTypes = {
   pathContext: PropTypes.object.isRequired,
   //navigatorPosition: PropTypes.string.isRequired,
   //setNavigatorPosition: PropTypes.func.isRequired,
-  match: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => {

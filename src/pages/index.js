@@ -15,11 +15,12 @@ class BlogIndex extends React.Component {
     const config = get(this.props, 'data.site.siteMetadata')
     const siteTitle = get(this.props, 'data.site.siteMetadata.title')
     const posts = get(this.props, 'data.allMarkdownRemark.edges')
+    const { location } = this.props
 
     return (
-      <Layout location={this.props.location}>
+      <Layout location={location}>
         <Seo config={config}/>
-        <LayoutHeader config={config}/>
+        <LayoutHeader config={config} location={location}/>
         {posts.length > 0 && <SimplePostList posts={posts} />}
       </Layout>
     )
