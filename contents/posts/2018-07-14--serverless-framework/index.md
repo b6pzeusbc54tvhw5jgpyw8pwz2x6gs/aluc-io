@@ -119,10 +119,11 @@ total 16
 1. 패키지를 찾지 못하면 인터넷(npm registry)에서 해당 패키지를 검색해 받아온뒤
    실행시킨다.
 
-`global` 영역에 serverless 를 설치하면 서로 다른 serverless 버전을 사용하는
-프로젝트를 동시에 진행하기 곤란하지만 `npx` 를 사용하면 각각의 프로젝트
-디렉토리 밑 `node_modules` 를 사용 할 수 있다. `package.json` 파일을 생성하고
-프로젝트 디렉토리 아래 `node_modules/` 에 serverless 를 설치 하자.
+`global` 영역에 **serverless** 를 설치하면 서로 다른 **serverless** 버전을
+사용하는 프로젝트를 동시에 진행하기 곤란하지만 `npx` 를 사용하면 각각의
+프로젝트 디렉토리의 `node_modules/` 아래 설치된 **serverless**를 사용 할 수
+있다. `package.json` 파일을 생성하고 프로젝트 디렉토리 아래 `node_modules/` 에
+**serverless** 를 설치 하자.
 
 ```sh
 $ yarn init
