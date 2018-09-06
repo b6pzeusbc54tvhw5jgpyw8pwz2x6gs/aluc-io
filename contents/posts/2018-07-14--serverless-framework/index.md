@@ -1,6 +1,6 @@
 ---
-title: serverless react
-subTitle: serverless react
+title: Serverless framework
+subTitle: Serverless framework
 category: guide
 published: true
 ---
