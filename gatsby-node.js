@@ -107,7 +107,7 @@ exports.onCreateWebpackConfig = ({ stage, actions, plugins }) => {
         'process.env.ALGOLIA_SEARCH_ONLY_API_KEY': JSON.stringify(process.env.ALGOLIA_SEARCH_ONLY_API_KEY),
         'process.env.ALGOLIA_INDEX_NAME': JSON.stringify(process.env.ALGOLIA_INDEX_NAME),
         'process.env.ALUCIO_FACEBOOK_APP_ID': JSON.stringify(process.env.ALUCIO_FACEBOOK_APP_ID),
-
+        'process.env.ALUCIO_UTTERANCES_REPO': JSON.stringify(process.env.ALUCIO_UTTERANCES_REPO),
       }),
     ],
   })

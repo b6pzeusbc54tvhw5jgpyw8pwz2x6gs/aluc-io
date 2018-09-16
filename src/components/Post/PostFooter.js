@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 //import asyncComponent from "_src/components/AsyncComponent";
 import { asyncComponent } from 'react-async-component';
 
-import PostComments from "./PostComments";
 import theme from "_src/theme/theme.yaml"
 
 const PostShare = asyncComponent({
@@ -13,12 +12,23 @@ const PostShare = asyncComponent({
   ErrorComponent: ({ error }) => <div>{error.message}</div>, // Optional
 })
 
+import ReactUtterences from 'react-utterances'
 
 const PostFooter = ({ author, post, slug, facebook }) => {
+
+  const specificTerm = ''
+  const type = specificTerm ? 'issue-term' : 'pathname'
+
   return (
     <footer className={'footer'}>
       <PostShare post={post} slug={slug} />
-      <PostComments post={post} slug={slug} facebook={facebook} />
+      <div className='postComments'>
+        <ReactUtterences
+          repo={process.env.ALUCIO_UTTERANCES_REPO}
+          specificTerm={specificTerm}
+          type={type}
+        />
+      </div>
       <style jsx>{`
         footer {
           color: ${theme.main.colors.footer};
@@ -27,6 +37,11 @@ const PostFooter = ({ author, post, slug, facebook }) => {
         }
         footer p {
           margin: 0;
+        }
+        .postComments {
+          margin: 3em 0 0;
+          padding: 3em 0 0;
+          border-top: 1px solid #ddd;
         }
       `}</style>
     </footer>

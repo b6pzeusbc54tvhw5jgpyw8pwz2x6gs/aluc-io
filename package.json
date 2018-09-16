@@ -57,6 +57,7 @@
     "react-router-dom": "^4.3.1",
     "react-share": "^2.2.0",
     "react-typography": "^0.16.13",
+    "react-utterances": "^0.6.0",
     "redux": "^4.0.0",
     "redux-devtools-extension": "^2.13.5",
     "serverless": "^1.30.3",
