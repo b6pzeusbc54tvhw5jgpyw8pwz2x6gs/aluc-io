@@ -16,18 +16,12 @@ module.exports.index = (event, context, callback) => {
   const depth1 = (event.pathParameters || {}).depth1 || ''
   const depth2 = (event.pathParameters || {}).depth2 || ''
 
-  let Key = ''
-  if( _.includes(['posts','pages'], depth1)) {
-    Key = path.join(depth1, depth2, 'index.html')
-  } else if( depth1.split('-')[0] === 'slide' && depth2 === '' ) {
-    Key = path.join(depth1,'index.html')
-  } else if( depth1 === 'search' ) {
-    Key = path.join(depth1, depth2, 'index.html')
-  } else if( depth1 === '' && depth2 === '' ) {
-    Key = 'index.html'
-  } else {
-    Key = path.join(depth1, depth2)
-  }
+  const Key = _.includes(['posts','pages'], depth1)       ? path.join(depth1, depth2, 'index.html')
+      : depth1.split('-')[0] === 'slide' && depth2 === '' ? path.join(depth1,'index.html')
+      : depth1 === 'search'                               ? path.join(depth1, depth2, 'index.html')
+      : depth1 === '' && depth2 === ''                    ? 'index.html'
+                                                          : path.join(depth1, depth2)
+
   console.log( 'Key: ' + Key )
 
   const Bucket = 'aluc.io'
@@ -36,7 +30,7 @@ module.exports.index = (event, context, callback) => {
 
     if (err) {
       console.error(err)
-      callback(null, {
+      return callback(null, {
         statusCode: 404,
         headers: {
           "Content-Type": "text/html;",
@@ -44,33 +38,27 @@ module.exports.index = (event, context, callback) => {
         },
         body: `PAGE NOT FOUND: ${Key}`,
       })
-      return
     }
 
     const contentType = mime.contentType(path.basename( Key ))
     console.log("Content-Type: " + contentType)
-    let response
-    if( contentType.split('/')[0] !== 'image' ) {
-      response = {
-        statusCode: 200,
-        headers: {
-          "Content-Type": contentType,
-          "Cache-Control": "no-cache",
-        },
-        body: data.Body.toString('utf-8'),
-      }
-    } else {
-      response = {
+
+    if( contentType.split('/')[0] === 'image' ) {
+      return callback(null, {
         statusCode: 302,
         headers: {
           Location: s3.getSignedUrl('getObject', { Bucket, Key }),
           "Content-Type": contentType,
           "Cache-Control": "no-cache",
         },
-      }
+      })
     }
 
-    callback(null, response )
+    return callback(null, {
+      statusCode: 200,
+      headers: { "Content-Type": contentType, "Cache-Control": "no-cache" },
+      body: data.Body.toString('utf-8'),
+    })
   })
 }
 
