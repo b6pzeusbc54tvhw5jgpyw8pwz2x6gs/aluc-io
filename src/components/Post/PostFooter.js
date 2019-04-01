@@ -12,6 +12,12 @@ const PostShare = asyncComponent({
   ErrorComponent: ({ error }) => <div>{error.message}</div>, // Optional
 })
 
+const GITHUB_NAMESPACE = "b6pzeusbc54tvhw5jgpyw8pwz2x6gs";
+const GITHUB_REPO_COMMENTS = "react-utterances-demo-comment";
+const GITHUB_REPO_REACT_UTTERANCES = "react-utterances";
+const GITHUB_URL_REACT_UTTERANCES = `https://github.com/${GITHUB_NAMESPACE}/${GITHUB_REPO_REACT_UTTERANCES}`;
+
+
 import ReactUtterences from 'react-utterances'
 
 const PostFooter = ({ author, post, slug, facebook }) => {

@@ -2,6 +2,7 @@ import { Link, graphql } from 'gatsby'
 import PropTypes from 'prop-types'
 import React from 'react'
 import get from 'lodash/get'
+import reject from 'lodash/reject'
 import Helmet from 'react-helmet'
 
 import Layout from '../components/layout'
@@ -14,7 +15,9 @@ class BlogIndex extends React.Component {
   render() {
     const config = get(this.props, 'data.site.siteMetadata')
     const siteTitle = get(this.props, 'data.site.siteMetadata.title')
-    const posts = get(this.props, 'data.allMarkdownRemark.edges')
+    let posts = get(this.props, 'data.allMarkdownRemark.edges')
+    posts = reject(posts, p => ! p.node.frontmatter.published)
+
     const { location } = this.props
 
     return (
@@ -66,6 +69,7 @@ export const pageQuery = graphql`
             title
             subTitle
             category
+            published
           }
         }
       }

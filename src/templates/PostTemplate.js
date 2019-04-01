@@ -6,7 +6,7 @@ require("core-js/fn/array/find")
 require("prismjs/themes/prism-okaidia.css")
 
 //import { setNavigatorPosition, setNavigatorShape } from "_src/store"
-import Post from "_src/components/Post/"
+import Post from "../components/Post/"
 import Footer from "_src/components/Footer/"
 import Seo from "_src/components/Seo"
 import Article from "_src/components/Main/Article"
@@ -21,6 +21,7 @@ class PostTemplate extends React.Component {
   render() {
     const { location, data, pathContext } = this.props
     const tableOfContents = data.post.tableOfContents
+    const headings = data.post.headings
     const facebook = (((data || {}).site || {}).siteMetadata || {}).facebook
 
     return (
@@ -34,6 +35,7 @@ class PostTemplate extends React.Component {
             author={data.author}
             facebook={facebook}
             tableOfContents={tableOfContents}
+            headings={headings}
           />
           <Footer footnote={data.footnote} />
           <Seo config={config} data={data.post} facebook={facebook} />
@@ -71,6 +73,10 @@ export const postQuery = graphql`
       id
       html
       tableOfContents
+      headings {
+        value
+        depth
+      }
       fields {
         slug
         prefix

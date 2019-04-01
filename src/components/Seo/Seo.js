@@ -2,7 +2,7 @@ import React from "react"
 import PropTypes from "prop-types"
 import Helmet from "react-helmet"
 
-import avatar from "_contents/pages/1--about/newavatar.jpg"
+import avatar from "../../../static/new-avatar.png"
 
 const Seo = props => {
   const { data, config } = props
