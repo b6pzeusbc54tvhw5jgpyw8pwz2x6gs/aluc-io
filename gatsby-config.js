@@ -1,3 +1,4 @@
+const { compact } = require('lodash')
 const queryAndTransformer = require('./config/algoria-query-transformer')
 
 module.exports = {
@@ -17,8 +18,8 @@ module.exports = {
     },
   },
   pathPrefix: '/',
-  plugins: [
-    {
+  plugins: compact([
+    process.env.CIRCLE_TAG && {
       resolve: `gatsby-plugin-algolia`,
       options: {
         appId: process.env.ALGOLIA_APP_ID || "",
@@ -95,5 +96,5 @@ module.exports = {
         pathToConfigModule: 'src/utils/typography',
       },
     },
-  ],
+  ]),
 }

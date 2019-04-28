@@ -3,9 +3,6 @@ const Promise = require('bluebird')
 const path = require('path')
 const { createFilePath } = require(`gatsby-source-filesystem`)
 
-const slugMap = {
-  '/pages/1--about': 'about-me',
-}
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
   return new Promise((resolve, reject) => {
@@ -53,11 +50,11 @@ exports.createPages = ({ graphql, actions }) => {
       _.each(posts, (post, index) => {
         const previous = index === posts.length - 1 ? null : posts[index + 1].node;
         const next = index === 0 ? null : posts[index - 1].node;
-        const slug = slugMap[post.node.fields.slug] || post.node.fields.slug
+        const slug = post.node.fields.slug
         createPage({
-          path: post.node.fields.slug,
+          path: slug,
           component: blogPost,
-          context: { slug: post.node.fields.slug, previous, next },
+          context: { slug, previous, next },
         })
       })
     }))
