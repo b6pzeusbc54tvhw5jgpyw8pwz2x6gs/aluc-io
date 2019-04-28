@@ -2,6 +2,7 @@ service: aluc-io
 frameworkVersion: ">=1.28.0"
 
 plugins:
+  - serverless-offline
   - serverless-webpack
   - serverless-api-cloudfront
 
@@ -24,29 +25,27 @@ custom:
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: ${env:SLS_STAGE}
+  stage: dev
   region: ap-northeast-2
-  timeout: 20
+  timeout: 2
   environment:
     SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
+    DEPLOYED_VERSION: ${env:CIRCLE_TAG}
   iamRoleStatements:
-  - Effect: Allow
-    Action:
-    - s3:GetObject
-    Resource:
-    - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
-    - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource:
+        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
+        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
 
 functions:
   index:
     handler: handler.index
     events:
-    - http:
-        path: "/"
-        method: get
-    - http:
-        path: "/{depth1}"
-        method: get
-    - http:
-        path: "/{depth1}/{depth2+}"
-        method: get
+      - http:
+          path: "/"
+          method: get
+      - http:
+          path: "/{proxy+}"
+          method: get

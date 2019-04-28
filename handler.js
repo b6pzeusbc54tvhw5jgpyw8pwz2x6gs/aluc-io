@@ -1,64 +1,46 @@
-const AWS = require('aws-sdk')
-const path = require('path')
-const mime = require('mime-types')
-const _ = require('lodash')
+import { join, basename } from 'path'
+
+import { createServer, proxy } from  'aws-serverless-express'
+import { eventContext } from  'aws-serverless-express/middleware'
+import express from 'express'
+import * as AWS from 'aws-sdk'
+import morgan from 'morgan'
+import mime from 'mime-types'
+import slash from 'slash'
+
+const { SLS_BUCKET_NAME, CIRCLE_TAG } = process.env
+
 const s3 = new AWS.S3()
+const binaryMimeTypes = []
+const app = express()
 
-// aluc.io/
-// aluc.io/about
-// aluc.io/search
+app.use(morgan('short'));
+app.use(eventContext())
 
-// handler.js
-module.exports.index = (event, context, callback) => {
-  console.log(event)
-  console.log(context)
 
-  const depth1 = (event.pathParameters || {}).depth1 || ''
-  const depth2 = (event.pathParameters || {}).depth2 || ''
+app.use('/', (req, res) => {
+  const s3Path =
+        /\d\d\d\d-\d\d-\d\d--/.test(req.path) ? join(req.path, 'index.html')
+      : req.path.split('-')[0] === 'slide'    ? join(req.path, 'index.html')
+      : /search/.test(req.path)               ? join(req.path, 'index.html')
+      : req.path === '/'                      ? 'index.html'
+      : req.path
 
-  const Key = _.includes(['posts','pages'], depth1)       ? path.join(depth1, depth2, 'index.html')
-      : depth1.split('-')[0] === 'slide' && depth2 === '' ? path.join(depth1,'index.html')
-      : depth1 === 'search'                               ? path.join(depth1, depth2, 'index.html')
-      : depth1 === '' && depth2 === ''                    ? 'index.html'
-                                                          : path.join(depth1, depth2)
+  const params = { Bucket: SLS_BUCKET_NAME, Key: slash(join(CIRCLE_TAG, s3Path)) }
+  s3.getObject(params, (err, data) => {
+    if (err) return res.status(404).send(`PAGE NOT FOUND: ${params.Key}`)
 
-  console.log( 'Key: ' + Key )
-
-  const Bucket = 'aluc.io'
-  const getParams = { Bucket, Key }
-  s3.getObject(getParams, (err, data) => {
-
-    if (err) {
-      console.error(err)
-      return callback(null, {
-        statusCode: 404,
-        headers: {
-          "Content-Type": "text/html;",
-          "Cache-Control": "no-cache",
-        },
-        body: `PAGE NOT FOUND: ${Key}`,
-      })
-    }
-
-    const contentType = mime.contentType(path.basename( Key ))
+    const contentType = mime.contentType(basename(params.Key))
     console.log("Content-Type: " + contentType)
 
     if( contentType.split('/')[0] === 'image' ) {
-      return callback(null, {
-        statusCode: 302,
-        headers: {
-          Location: s3.getSignedUrl('getObject', { Bucket, Key }),
-          "Content-Type": contentType,
-          "Cache-Control": "no-cache",
-        },
-      })
+      return res.redirect(s3.getSignedUrl('getObject', params))
     }
 
-    return callback(null, {
-      statusCode: 200,
-      headers: { "Content-Type": contentType, "Cache-Control": "no-cache" },
-      body: data.Body.toString('utf-8'),
-    })
+    res.send(data.Body.toString('utf-8'))
   })
-}
+})
+
+const server = createServer(app, null, binaryMimeTypes)
+export const index = (event, context) => proxy(server, event, context)
 
