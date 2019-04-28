@@ -30,56 +30,82 @@ me:
   'javascript',
   'korean',
   'typescript',
-  'python',
   'java',
+  'python',
 ]
 ```
 
 ![avatar](./keynote2.jpg?mw=400)
 
-## My toolbox
+## My Graduated tools
+`Graduation` does not mean **mastered**. It just means a tool
+with a lot of experience and a level of proficiency enough
+to briefly explain to the peers the basic usage of the tool.
 
 ```js
 [
-  { name: `nodejs`,               tag: ['rumtime']  },
-  { name: `babel`,                tag: ['compiler']  },
+  { name: `react`,                tag: ['web']                               },
+  { name: `redux`,                tag: ['state_management']                  },
+  { name: `nodejs`,               tag: ['rumtime']                           },
+  { name: 'gitlab-ci',            tag: ['code_pipeline']                     },
+  { name: 'jenkins',              tag: ['automation']                        },
+  { name: `git`,                  tag: ['VCS']                               },
+  { name: `docker`,               tag: ['container']                         },
+  { name: `babel`,                tag: ['compiler']                          },
 
-  { name: `gatsby`,               tag: ['web']  },
-  { name: `jquery`,               tag: ['web']  },
+  { name: `slack`,                tag: ['communication']                     },
+  { name: `markdown`,             tag: ['content_format']                    },
+
+  { name: `jquery`,               tag: ['web'],             deprecated: true },
+  { name: `vim`,                  tag: ['editor']           deprecated: true },
+]
+```
+
+## My Incubating tool
+`Incubating` means a tool that has some experience of using
+it but needs more experience and study to solve the problem.
+
+```js
+[
   { name: `webpack`,              tag: ['web']  },
-  { name: `react`,                tag: ['web']  },
-  { name: `redux`,                tag: ['test'] },
+  { name: `gatsby`,               tag: ['web']  },
   { name: `jest`,                 tag: ['test'] },
   { name: `mocha`,                tag: ['test'] },
 
   { name: `serverless framework`, tag: ['serverless']  },
 
-  { name: `git`,        tag: ['vcs'] },
-  { name: `p4`,         tag: ['vcs'] },
+  { name: `VS Code`,              tag: ['IDE'] },
+  { name: `IntelliJ`,             tag: ['IDE'] },
 
-  { name: `docker`,     tag: ['container'] },
+  { name: `gradle`,               tag: ['build'] },
+  { name: 'terraform',            tag: ['IaC'] },
 
-  { name: `vim`,        tag: ['editor'] },
-  { name: `VS Code`,    tag: ['IDE'] },
-  { name: `IntelliJ`,   tag: ['IDE'] },
+  { name: 'circle-ci',            tag: ['code_pipeline'] },
+  { name: 'travis',               tag: ['code_pipeline'] },
 
-  { name: `gradle`,     tag: ['build'] },
+  { name: `Ansible`,              tag: ['automation'] },
+  { name: `Vagrant`,              tag: ['automation'] },
+  { name: `packer`,               tag: ['automation'] },
+  { name: `fluentd`,              tag: ['logging'] },
 
-  { name: 'terraform',  tag: ['IaC'] },
-
-  { name: 'circle-ci',  tag: ['code_pipeline'] },
-  { name: 'travis',     tag: ['code_pipeline'] },
-  { name: 'gitlab-ci',  tag: ['code_pipeline'] },
-
-  { name: 'jenkins',    tag: ['automation'] },
-  { name: `ansible`,    tag: ['automation'] },
-
-  { name: `Vagrant`,    tag: ['automation'] },
-  { name: `fluentd`,    tag: ['logging'] },
+  { name: `p4`,                   tag: ['VCS'],             deprecated: true },
+  { name: `maven`,                tag: ['build'],           deprecated: true },
 ]
 ```
 
 ![monitor](./monitor.jpg)
+
+## My Sandbox tools
+`Sandbox` means a tool that has very little experience and
+requires more study to be introduced in practice.
+
+```js
+[
+  { name: `kubernetes`,     tag: ['container_orchestration']   },
+  { name: `valut`,          tag: ['security']                  },
+  { name: `graphql`,        tag: ['query_language']            },
+]
+```
 
 ## List to add to toolbox
 
@@ -87,10 +113,8 @@ me:
 [
   { name: `react native`,   tag: ['client_application']        },
   { name: `solidity`,       tag: ['decentralized_application'] },
-  { name: `kubernetes`,     tag: ['container_orchestration']   },
-  { name: `valut`,          tag: ['security']                  },
-  { name: `graphql`,        tag: ['query_language']            },
-]
+  { name: `slack-apps`,     tag: ['automation']                },
+[
 ```
 
 I'm trying to add more stuff to the Toolbox.
@@ -101,21 +125,29 @@ I'm trying to add more stuff to the Toolbox.
 
 ## Projects
 
-- I developed [EPub][epub] Viewer (on [Tizen][tizen])
+- [EPub][epub] Viewer (on [Tizen][tizen])
 
-- I developed and released Gear2 [WatchOn Remote][watchon]
+- Gear2 [WatchOn Remote][watchon]
 ![remote](./watchonRemote.jpg?mw=640)
 
-- I developed Gear S Milk (Web client)
-- I developed Tizen TV Milk (Web client)
-- I developed Milk Web version
+- Gear S Milk (Web client)
+- Tizen TV Milk (Web client)
+- Milk Web version
 ![watchonRemote](./milkweb.jpg?mw=640)
 
-- I developed and released Gear App Store Client (Mobile Web Version)
+- Gear App Store Client (Mobile Web Version)
 ![gmw](./gmw.png?mw=640)
 
-- I'm work on [Galaxy App Store Server][gas] ([Java Spring Framework][spring])
+- [Galaxy App Store Server][gas] ([Java Spring Framework][spring])
 
+- [Galaxy App Store Server][gas]
+
+## Open sources
+- [show-me-the-video][show_me_the_video]
+![show-me-the-video](./show-me-the-video.png)
+
+
+## About blog
 - Here is Based on [@greglobinski][greglobinski]'s Gatsby starter. Thanks!
 
 [greglobinski]: https://www.greglobinski.com/
@@ -159,3 +191,4 @@ I'm trying to add more stuff to the Toolbox.
 [gui]: https://en.wikipedia.org/wiki/Graphical_user_interface
 [tizen]: https://www.tizen.org/
 [spring]: https://spring.io/
+[show_me_the_video]: https://github.com/aluc-io/show-me-the-video
