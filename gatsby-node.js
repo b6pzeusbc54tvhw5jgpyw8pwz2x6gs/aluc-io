@@ -1,90 +1,87 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
-const { createFilePath } = require('gatsby-source-filesystem')
+const { createFilePath } = require(`gatsby-source-filesystem`)
 
+const slugMap = {
+  '/pages/1--about': 'about-me',
+}
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
   return new Promise((resolve, reject) => {
     //const blogPost = path.resolve('./src/templates/blog-post.js')
     const blogPost = path.resolve('./src/templates/PostTemplate.js')
-    resolve(
-      graphql(`{
-        allMarkdownRemark(
-          filter: { fields: { slug: { regex: "//posts|pages//" }}},
-          sort: { fields: [fields___prefix], order: DESC },
-          limit: 1000
-        ) {
-          edges {
-            node {
-              id
-              fileAbsolutePath
-              fields {
-                slug
-                prefix
-              }
-              frontmatter {
-                title
-              }
+    resolve( graphql(`{
+      allMarkdownRemark(
+        sort: { fields: [fields___prefix], order: DESC },
+        limit: 1000
+      ) {
+        edges {
+          node {
+            id
+            fileAbsolutePath
+            fields {
+              slug
+              prefix
+            }
+            frontmatter {
+              title
             }
           }
         }
-      }`).then(result => {
-        if (result.errors) {
-          console.error(result.errors)
-          reject(result.errors)
-        }
+      }
+    }`).then(result => {
+      if (result.errors) {
+        console.error(result.errors)
+        reject(result.errors)
+        return
+      }
 
-        // Create blog posts pages.
-        let posts = result.data.allMarkdownRemark.edges
-        posts = _.reject(posts, post => {
-          const isPost = /^\/posts\//.test(post.node.fields.slug)
-          const isIndexMd = /index\.md$/.test(post.node.fileAbsolutePath)
-          return isPost && ! isIndexMd
-        })
+      // Create blog posts pages.
+      let posts = result.data.allMarkdownRemark.edges
+      posts = _.reject(posts, post => {
+        
+        // 아래 "if( isPost && ! isIndexMd ) return" 문에서 fileds 생성이 안된 노드들
+        if (!post.node.fields) return true
 
-        _.each(posts, (post, index) => {
-          const previous = index === posts.length - 1 ? null : posts[index + 1].node;
-          const next = index === 0 ? null : posts[index - 1].node;
+        const isPost = /^\/posts\//.test(post.node.fields.slug)
+        const isIndexMd = /index\.md$/.test(post.node.fileAbsolutePath)
+        return isPost && ! isIndexMd
+      })
 
-          createPage({
-            path: post.node.fields.slug,
-            component: blogPost,
-            context: {
-              slug: post.node.fields.slug,
-              previous,
-              next,
-            },
-          })
+      _.each(posts, (post, index) => {
+        const previous = index === posts.length - 1 ? null : posts[index + 1].node;
+        const next = index === 0 ? null : posts[index - 1].node;
+        const slug = slugMap[post.node.fields.slug] || post.node.fields.slug
+        createPage({
+          path: post.node.fields.slug,
+          component: blogPost,
+          context: { slug: post.node.fields.slug, previous, next },
         })
       })
-    )
+    }))
   })
 }
 
 exports.onCreateNode = ({ node, actions, getNode }) => {
+  if (node.internal.type !== `MarkdownRemark`) return
+
   const { createNodeField } = actions
+  const contentsPath = path.resolve('./contents')
+  const fileRelativePath = path.relative(contentsPath, node.fileAbsolutePath)
+  const slug = `/` + path.dirname(fileRelativePath)
 
-  if (node.internal.type === `MarkdownRemark`) {
-    const contentsPath = path.resolve('./contents')
+  const isPost = /^posts\//.test(fileRelativePath)
+  const isIndexMd = /index\.md$/.test(fileRelativePath)
+  if( isPost && ! isIndexMd ) return
 
+  createNodeField({ node, name: `fileRelativePath`, value: fileRelativePath })
 
-    const fileRelativePath = path.relative(contentsPath, node.fileAbsolutePath)
+  const relativeFilePath = createFilePath({ node, getNode, trailingSlash: false })
+  createNodeField({ node, name: `slug`, value: relativeFilePath })
 
-    const isPost = /^posts\//.test(fileRelativePath)
-    const isIndexMd = /index\.md$/.test(fileRelativePath)
-    if( isPost && ! isIndexMd ) return
-
-    createNodeField({ node, name: `fileRelativePath`, value: fileRelativePath })
-
-    const slug = `/` + path.dirname(fileRelativePath)
-    createNodeField({ node, name: `slug`, value: slug })
-    //console.log(slug)
-
-    const prefix = path.basename(slug).split('--')[0]
-    //console.log(prefix)
-    createNodeField({ node, name: `prefix`, value: prefix })
-  }
+  const prefix = path.basename(slug).split('--')[0]
+  createNodeField({ node, name: `prefix`, value: prefix })
 }
 
 exports.onCreateWebpackConfig = ({ stage, actions, plugins }) => {

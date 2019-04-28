@@ -9,39 +9,44 @@ require("prismjs/themes/prism-okaidia.css")
 import Post from "../components/Post/"
 import Footer from "_src/components/Footer/"
 import Seo from "_src/components/Seo"
-import Article from "_src/components/Main/Article"
+import Article from "../components/Main/Article"
 
 import theme from "_src/theme/theme.yaml"
 import config from "_config/meta"
 import Layout from '../components/layout'
 import LayoutHeader from '_src/components/LayoutHeader'
+import { canRenderTOCSelector } from '../selectors/layout'
 
 class PostTemplate extends React.Component {
 
   render() {
-    const { location, data, pathContext } = this.props
+    const { location, data, pathContext, canRenderTOC } = this.props
     const tableOfContents = data.post.tableOfContents
     const headings = data.post.headings
     const facebook = (((data || {}).site || {}).siteMetadata || {}).facebook
 
     return (
-      <Layout location={location}>
+      <Layout location={location} canRenderTOC={canRenderTOC} headings={headings} tableOfContents={tableOfContents}>
         { !/\/pages\/1--about\/?$/.test(location.pathname)  && <LayoutHeader location={location} config={config}/>}
-        <Article>
-          <Post
-            location={location}
-            post={data.post}
-            slug={pathContext.slug}
-            author={data.author}
-            facebook={facebook}
-            tableOfContents={tableOfContents}
-            headings={headings}
-          />
-          <Footer footnote={data.footnote} />
-          <Seo config={config} data={data.post} facebook={facebook} />
-        </Article>
+        <Post
+          location={location}
+          post={data.post}
+          slug={pathContext.slug}
+          author={data.author}
+          facebook={facebook}
+          tableOfContents={tableOfContents}
+          headings={headings}
+        />
+        <Footer footnote={data.footnote} />
+        <Seo config={config} data={data.post} facebook={facebook} />
       </Layout>
     )
+  }
+}
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    canRenderTOC: canRenderTOCSelector(state),
   }
 }
 
@@ -51,12 +56,7 @@ PostTemplate.propTypes = {
   //navigatorPosition: PropTypes.string.isRequired,
   //setNavigatorPosition: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
-}
-
-const mapStateToProps = (state, ownProps) => {
-  return {
-    //navigatorPosition: state.navigatorPosition,
-  }
+  canRenderTOC: PropTypes.bool.isRequired,
 }
 
 const mapDispatchToProps = {

@@ -7,6 +7,8 @@ import { setWindowSize } from '_src/store'
 
 import { rhythm, scale } from '../utils/typography'
 import ToolBox from './ToolBox'
+import theme from "../theme/theme.yaml"
+import TOC from "../components/Post/TOC"
 
 class Layout extends React.Component {
   componentDidMount() {
@@ -25,22 +27,48 @@ class Layout extends React.Component {
   }
 
   render() {
-    const { location, children } = this.props
+    const { location, children, canRenderTOC, headings, tableOfContents } = this.props
     // const rootPath = `${__PATH_PREFIX__}/`
     // let header
 
     return (
-      <div
-        style={{
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          maxWidth: rhythm(28),
-          padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
-        }}
-      >
+      <div className='layout'>
         <ToolBox location={location}/>
-        {children}
+        <div className='tocBox'>
+          { canRenderTOC && <TOC headings={headings} tableOfContents={tableOfContents}/>}
+        </div>
+        <div className='content'>
+          {children}
+        </div>
+        <style jsx>{`
+          .layout {
+            margin-left: auto;
+            margin-right: auto;
+            max-width: ${rhythm(32)};
+            padding: ${rhythm(1.5)} ${rhythm(3 / 4)};
+          }
+          .tocBox {
+            width: ${canRenderTOC ? '25%' : '0%' };
+            float: left;
+            background-color: red;
+          }
+          .content {
+            width: 100%;
+            padding-left: ${canRenderTOC ? '25%' : '0%' };
+            box-sizing: border-box;
+          }
+          @from-width m {
+            .layout {
+            }
+          }
+          @from-width l {
+            .layout {
+              max-width: ${rhythm(36)};
+            }
+          }
+        `}</style>
       </div>
+
     )
   }
 }
@@ -52,6 +80,9 @@ Layout.propTypes = {
   ]).isRequired,
   setWindowSize: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
+  canRenderTOC: PropTypes.bool,
+  headings: PropTypes.array,
+  tableOfContents: PropTypes.string,
   //fontSizeIncrease: PropTypes.number.isRequired,
   //setFontSizeIncrease: PropTypes.func.isRequired,
 }
@@ -60,6 +91,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     //isWideScreen: state.isWideScreen,
     //fontSizeIncrease: state.fontSizeIncrease,
+    showLayout: state.layout.showLayout,
   }
 }
 

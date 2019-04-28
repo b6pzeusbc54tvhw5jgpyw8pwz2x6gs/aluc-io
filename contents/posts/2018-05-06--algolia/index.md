@@ -3,7 +3,7 @@ title: gatsby 에 algolia search 적용
 subTitle: 겁나 빠른 managed search 서비스
 category: guide
 cover: photo-cover-cover.png
-published: false
+published: true
 ---
 
 블로그에 검색 기능은 필수이다. [algolia][algolia] 는 SaaS(Service as a service)

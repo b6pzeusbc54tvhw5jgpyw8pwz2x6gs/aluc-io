@@ -52,12 +52,17 @@ module.exports = {
     {
       resolve: `gatsby-transformer-remark`,
       options: {
+        commonmark: true,
         plugins: [
           {
-            resolve: `gatsby-remark-images`,
+            resolve: `my-gatsby-remark-images`,
             options: {
               maxWidth: 800,
               backgroundColor: "transparent",
+              wrapperStyle: ({ query }) => {
+                const { mw } = query
+                return mw ? `max-width: ${mw}px;` : ''
+              }
             },
           },
           {
@@ -73,8 +78,8 @@ module.exports = {
         ],
       },
     },
-    `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
+    `gatsby-transformer-sharp`,
     {
       resolve: `gatsby-plugin-google-analytics`,
       options: {

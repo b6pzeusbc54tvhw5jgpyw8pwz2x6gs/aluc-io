@@ -2,7 +2,7 @@
 title: docker 설치하기
 subTitle: docker 설치 및 프록시 셋팅
 category: guide
-published: false
+published: true
 ---
 
 Docker 설치시 매번 인터넷 검색을 하다보니 매번 조금씩 다른 가이드를 보게되어

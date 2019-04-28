@@ -19,6 +19,6 @@ export const canRenderTOCSelector = createSelector(
     if (typeof window === `undefined`) {
       return false
     }
-    return width >= mediaQueryL + 50
+    return width >= mediaQueryL
   }
 )

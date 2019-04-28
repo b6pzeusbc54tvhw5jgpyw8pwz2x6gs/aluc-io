@@ -3,7 +3,7 @@ title: Gatsby 블로그 Facebook 소셜 댓글 플러그인 설치
 subTitle: gatsby 로 serverless 블로그 AWS 배포하기
 category: guide
 cover: photo-cover-cover.png
-published: false
+published: true
 ---
 
 지난번 AWS S3 를 사용하여 [Gatsby blog][gatsby_blog_1] 를 배포하는 포스트에 이어

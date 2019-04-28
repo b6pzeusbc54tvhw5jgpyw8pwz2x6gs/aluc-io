@@ -25,6 +25,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['env'],
+            plugins: ["styled-jsx/babel"],
           },
         }],
         //loader: 'babel-loader',

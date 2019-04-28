@@ -2,7 +2,7 @@
 title: git filter-branch 로 모든 커밋 변경하기
 subTitle: git filter-branch, reflog, force push
 category: guide
-published: false
+published: true
 ---
 
 git 은 분산 버전 컨트롤 시스템이다. 원격 저장소에 `push` 하여 공유하기 전에는

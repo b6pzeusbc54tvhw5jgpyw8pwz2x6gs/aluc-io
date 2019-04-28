@@ -1,4 +1,5 @@
 import React from "react"
+import { connect } from 'react-redux'
 import PropTypes from "prop-types"
 import Scrollspy from 'react-scrollspy'
 import cheerio from 'cheerio'
@@ -6,16 +7,33 @@ import { findIndex } from 'lodash'
 import cx from 'classnames'
 
 const LI = ({ value, depth, id, isActive }) => {
+
   const cn = cx(depth, {actived: isActive})
+  const $v = cheerio.load(value, { xmlMode: true })
+  const vArr = $v().children()[0].children.map( node => {
+    if (node.type === 'tag') return node.children[0].data
+    else return node.data
+  })
+
   return (
     <li className={cn}>
-      <a href={'#' + id}>{value}</a>
+      <a href={'#' + id}>{vArr.join('')}</a>
         <style jsx>{`
           li {
+            font-size: 14px;
             margin: 0px;
           }
           :global(.actived) {
-            background-color: blue;
+            background-color: #6e6ee866;
+          }
+          :global(.depth1) {
+            padding-left: 0px;
+          }
+          :global(.depth2) {
+            padding-left: 12px;
+          }
+          :global(.depth3) {
+            padding-left: 24px;
           }
         `}</style>
     </li>
@@ -62,24 +80,31 @@ class TOC extends React.Component {
 
   render() {
     const headingIdArr = this.state.headings.map(h => h.id)
+    const { showLayout } = this.props
 
     return (
       <div className='toc'>
-        <Scrollspy
-          items={headingIdArr}
-          currentClassName="is-current"
-          scrolledPastClassName='past'
-          onUpdate={this.updateTOC}
-        >
-          { this.state.headings.map( (h,i) => <LI key={i} value={h.value} depth={h.depth} id={h.id} isActive={h.isActive}/>)}
-        </Scrollspy>
+        <div className="tocInner">
+          <Scrollspy
+            items={headingIdArr}
+            currentClassName="is-current"
+            scrolledPastClassName='past'
+            onUpdate={this.updateTOC}
+          >
+            { this.state.headings.map( (h,i) => <LI key={i} value={h.value} depth={h.depth} id={h.id} isActive={h.isActive}/>)}
+          </Scrollspy>
+        </div>
 
         <style jsx>{`
           .toc {
-            width: 20rem;
             font-size: 12px;
+            margin-top: 122px;
+            width: 240px;
             position: fixed;
-            left: 4px;
+            overflow: hidden;
+          }
+          .tocInner {
+            background-color: ${showLayout ? '#0000ff24' : 'initial'};
           }
           .inner :global(a:hover) {
             box-shadow: none;
@@ -97,6 +122,16 @@ class TOC extends React.Component {
 TOC.propTypes = {
   headings: PropTypes.array.isRequired,
   tableOfContents: PropTypes.string.isRequired,
+  showLayout: PropTypes.bool.isRequired,
 }
 
-export default TOC
+const mapStateToProps = (state, ownProps) => {
+  return {
+    //isWideScreen: state.isWideScreen,
+    //fontSizeIncrease: state.fontSizeIncrease,
+    showLayout: state.layout.showLayout,
+  }
+}
+
+export default connect(mapStateToProps)(TOC)
+

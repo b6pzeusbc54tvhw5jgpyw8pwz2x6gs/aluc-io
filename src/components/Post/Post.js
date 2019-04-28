@@ -5,18 +5,13 @@ import { connect } from "react-redux"
 import theme from "_src/theme/theme.yaml"
 
 import { canRenderTOCSelector } from '../../selectors/layout'
-import Article from "../Main/Article"
 import Headline from "./Headline"
 import Content from "../Main/Content"
 import PostFooter from "./PostFooter"
 import Meta from "./Meta"
-import TOC from "./TOC"
-
-const SHOW_LAYOUT = false
 
 const Post = props => {
-  const { post, author, slug, facebook, headings, tableOfContents } = props
-  const { canRenderTOC } = props
+  const { post, author, slug, facebook, showLayout } = props
   const { location } = props
   const frontmatter = (post || {}).frontmatter
 
@@ -30,16 +25,32 @@ const Post = props => {
 
   return (
     <div className='box'>
-      { canRenderTOC && <TOC headings={headings} tableOfContents={tableOfContents}/>}
-      <Article>
+      <article className="articleBox">
         <Headline title={title} theme={theme}/>
         { !/\/pages\/1--about\/?$/.test(location.pathname) && <Meta prefix={prefix} authorName={authorName} category={category}/>}
         <Content html={html} />
         <PostFooter author={author} post={post} slug={slug} facebook={facebook} />
-      </Article>
+      </article>
       <style jsx>{`
         .box {
-          background-color: ${SHOW_LAYOUT ? 'yellow' : 'inherit'};
+        }
+        .articleBox {
+          padding: ${theme.space.inset.xs};
+          margin: 0 auto;
+          background-color: ${showLayout ? '#a6ff002e' : 'initial' };
+        }
+        @from-width m {
+          .articleBox {
+            padding: ${`calc(${theme.space.s}) calc(${theme.space.s})`};
+          }
+        }
+        @from-width l {
+          .articleBox {
+            padding: ${`calc(${theme.space.default} * 2) 0 calc(${
+              theme.space.default
+            })`};
+            max-width: ${theme.text.maxWidth.desktop};
+          }
         }
       `}</style>
     </div>
@@ -49,6 +60,7 @@ const Post = props => {
 const mapStateToProps = (state, ownProps) => {
   return {
     canRenderTOC: canRenderTOCSelector(state),
+    showLayout: state.layout.showLayout,
   }
 }
 
@@ -61,6 +73,7 @@ Post.propTypes = {
   headings: PropTypes.array.isRequired,
   tableOfContents: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
+  showLayout: PropTypes.bool.isRequired,
 }
 
 
