@@ -4,9 +4,7 @@ const includes = require("lodash/includes")
 const compact = require("lodash/compact")
 
 const query = `{
-  allMarkdownRemark(filter: {
-    fields: { slug: { regex: "//posts|pages|parts//" }}
-  }) {
+  allMarkdownRemark {
     edges {
       node {
         fields {
@@ -18,6 +16,7 @@ const query = `{
         }
         frontmatter {
           title
+          published
         }
       }
     }
@@ -30,6 +29,9 @@ const transformer = ({ data }) => {
   index.setSettings({ searchableAttributes: ["text", "slug", "searchableFrontmatter"] })
 
   let headingList = data.allMarkdownRemark.edges.map(({ node }) => {
+    if (!node.fields) return null
+    if (!(node.frontmatter || {}).published) return null
+
     const list = []
     const algoliaObjectList = []
 
@@ -47,13 +49,14 @@ const transformer = ({ data }) => {
     }
     node.htmlAst.children.forEach(recusive)
 
+
     let currentHeadingId = node.fields.slug
     let currentSlug = ""
     let tmpTextList = []
 
     algoliaObjectList.push({
-      objectID: `${currentHeadingId} -- frontmatter`,
-      searchableFrontmatter: node.frontmatter,
+      objectID: `${currentHeadingId} -- page`,
+      searchableFrontmatter: { title: node.frontmatter.title },
       text: "",
       slug: currentSlug,
       fields: node.fields,
@@ -73,7 +76,7 @@ const transformer = ({ data }) => {
           frontmatter: node.frontmatter,
         })
 
-        currentHeadingId = node.fields.slug + n.properties.id
+        currentHeadingId = `${node.fields.slug}#${n.properties.id}`,
         currentSlug = n.properties.id
 
         tmpTextList = []
@@ -86,6 +89,7 @@ const transformer = ({ data }) => {
     return algoliaObjectList
   })
 
+  headingList = compact(headingList)
   headingList = flatten(headingList)
   return headingList
 }

@@ -43,6 +43,7 @@ exports.createPages = ({ graphql, actions }) => {
         
         // 아래 "if( isPost && ! isIndexMd ) return" 문에서 fileds 생성이 안된 노드들
         if (!post.node.fields) return true
+        if ((!post.node.frontmatter || {}).published) return true
 
         const isPost = /^\/posts\//.test(post.node.fields.slug)
         const isIndexMd = /index\.md$/.test(post.node.fileAbsolutePath)
