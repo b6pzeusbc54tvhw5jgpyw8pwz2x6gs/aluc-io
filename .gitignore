@@ -9,3 +9,6 @@ public
 
 /.serverless/
 /.webpack/
+/.terraform
+
+*.log

@@ -23,6 +23,7 @@ app.use('/', (req, res) => {
         /\d\d\d\d-\d\d-\d\d--/.test(req.path) ? join(req.path, 'index.html')
       : req.path.split('-')[0] === 'slide'    ? join(req.path, 'index.html')
       : /search/.test(req.path)               ? join(req.path, 'index.html')
+      : /about-me/.test(req.path)             ? join(req.path, 'index.html')
       : req.path === '/'                      ? 'index.html'
       : req.path
 
@@ -31,16 +32,15 @@ app.use('/', (req, res) => {
     if (err) return res.status(404).send(`PAGE NOT FOUND: ${params.Key}`)
 
     const contentType = mime.contentType(basename(params.Key))
-    console.log("Content-Type: " + contentType)
 
     if( contentType.split('/')[0] === 'image' ) {
       return res.redirect(s3.getSignedUrl('getObject', params))
     }
 
+    res.set('content-type', contentType)
     res.send(data.Body.toString('utf-8'))
   })
 })
 
 const server = createServer(app, null, binaryMimeTypes)
 export const index = (event, context) => proxy(server, event, context)
-

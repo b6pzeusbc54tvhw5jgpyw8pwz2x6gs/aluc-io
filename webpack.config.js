@@ -17,7 +17,23 @@ module.exports = {
     sourceMapFilename: '[file].map',
   },
   module: {
-    rules: [],
+    rules: [
+      {
+        test: /\.(tsx?)|(jsx?)$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+              presets: [
+                "@babel/env",
+              ],
+            },
+          },
+        ],
+      },
+    ],
   },
   target: 'node',
   externals: ['aws-sdk'],

@@ -4,19 +4,8 @@ frameworkVersion: ">=1.28.0"
 plugins:
   - serverless-offline
   - serverless-webpack
-  - serverless-api-cloudfront
 
 custom:
-  apiCloudFront:
-    domain: aluc.io
-    certificate: arn:aws:acm:us-east-1:539425821792:certificate/619fddca-1aaf-458e-9803-20cc9171eeda
-    compress: false
-    logging:
-      bucket: aluc.io.log.s3.amazonaws.com
-      prefix: my-prefix
-    cookies: none
-    headers:
-      - x-api-key
   webpack:
     includeModules: false
     webpackConfig: webpack.config.js
@@ -25,12 +14,13 @@ custom:
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
+  stage: ${env:SLS_STAGE}
   region: ap-northeast-2
+  memorySize: 128
   timeout: 2
   environment:
     SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
-    DEPLOYED_VERSION: ${env:CIRCLE_TAG}
+    CIRCLE_TAG: ${env:CIRCLE_TAG}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -43,9 +33,6 @@ functions:
   index:
     handler: handler.index
     events:
-      - http:
-          path: "/"
-          method: get
       - http:
           path: "/{proxy+}"
           method: get
