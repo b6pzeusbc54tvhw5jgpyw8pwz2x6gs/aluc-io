@@ -17,7 +17,7 @@ const LayoutHeader = props => {
   return (
     <div className={boxCN}>
       <div className='avatarBox'>
-        <Link className='link' to="/pages/1--about">
+        <Link className='link' to="/about-me">
           <Avatar alt={config.infoTitle} src={avatar} className='avatar' />
         </Link>
       </div>

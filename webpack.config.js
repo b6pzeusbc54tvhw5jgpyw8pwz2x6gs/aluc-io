@@ -1,3 +1,4 @@
+const CopyPlugin = require('copy-webpack-plugin')
 const nodeExternals = require('webpack-node-externals')
 const path = require('path')
 const slsw = require('serverless-webpack')
@@ -35,6 +36,11 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new CopyPlugin([
+      { from: 'static/favicon', to: 'static/favicon' },
+    ]),
+  ],
   target: 'node',
   externals: ['aws-sdk'],
 }
