@@ -41,6 +41,6 @@ workflows:
   build_s3copy:
     jobs:
       - gatsby_build
-      - s3copy
+      - s3copy:
           requires:
             - gatsby_build
