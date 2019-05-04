@@ -19,7 +19,7 @@ module.exports = {
   },
   pathPrefix: '/',
   plugins: compact([
-    process.env.CIRCLE_TAG && {
+    process.env.CIRCLE_TAG && process.env.CIRCLE_TAG !== 'local' && {
       resolve: `gatsby-plugin-algolia`,
       options: {
         appId: process.env.ALGOLIA_APP_ID || "",

@@ -4,8 +4,6 @@ import { app } from './app'
 
 app.use(eventContext())
 
-const binaryMimeTypes = [
-  'application/javascript',
-]
+const binaryMimeTypes = []
 const server = createServer(app, null, binaryMimeTypes)
 export const index = (event, context) => proxy(server, event, context)
