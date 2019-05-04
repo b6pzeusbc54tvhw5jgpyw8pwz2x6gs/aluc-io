@@ -9,7 +9,7 @@ orbs:
 
 jobs:
   gatsby_build:
-    working_directory: ~/repo
+    working_directory: /tmp
     docker:
       - image: circleci/node:10.15
     steps:
@@ -25,12 +25,20 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - public
+
   s3copy:
-    working_directory: ~/repo
+    working_directory: /tmp
     executor: aws-cli/default
     steps:
       - aws-cli/install
+      - attach_workspace:
+          at: /tmp/public
       - run: |
+          ls -al
           S3PREFIX=${CIRCLE_TAG:-local}
           echo $S3PREFIX
           aws --version
