@@ -42,8 +42,7 @@ jobs:
           at: /home/circleci/repo
       - run: |
           ls -al
-          echo $AWS_ACCESS_KEY_ID
-          S3PREFIX=${CIRCLE_TAG:-local}
+          S3PREFIX=${CIRCLE_TAG:-latest}
           echo $S3PREFIX
           aws --version
           aws s3 rm s3://$ALUCIO_S3BUCKET_NAME/$S3PREFIX --recursive
@@ -60,6 +59,20 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run: |
           ls -al
+          if [ "x$CIRCLE_TAG" == "x" ]
+          then
+            SLS_STAGE=latest
+          else
+            SLS_STAGE=prod
+          fi
+
+          S3PREFIX=${CIRCLE_TAG:-latest}
+          GIT_REVISION=$(git describe)
+
+          echo $SLS_STAGE
+          echo $S3PREFIX
+          echo $GIT_REVISION
+
           npx sls package --package build
           cp -r build artifacts
           npx sls deploy --package build

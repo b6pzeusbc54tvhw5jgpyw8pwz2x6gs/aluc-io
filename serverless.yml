@@ -20,7 +20,8 @@ provider:
   timeout: 2
   environment:
     ALUCIO_S3BUCKET_NAME: ${env:ALUCIO_S3BUCKET_NAME}
-    CIRCLE_TAG: ${env:CIRCLE_TAG}
+    GIT_REVISION: ${env:GIT_REVISION}
+    S3PREFIX: ${env:S3PREFIX}
   iamRoleStatements:
     - Effect: Allow
       Action:
