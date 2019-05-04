@@ -5,12 +5,16 @@ import morgan from 'morgan'
 import mime from 'mime-types'
 import slash from 'slash'
 
-const { SLS_BUCKET_NAME, CIRCLE_TAG } = process.env
+const { ALUCIO_S3BUCKET_NAME, CIRCLE_TAG } = process.env
 
 const s3 = new AWS.S3()
 export const app = express()
 
 app.use(morgan('short'));
+
+app.use('/version', (req, res) => {
+  res.json({ CIRCLE_TAG })
+})
 
 app.use('/', (req, res) => {
   const s3Path =
@@ -24,9 +28,7 @@ app.use('/', (req, res) => {
       : req.path === '/'                         ? 'index.html'
       : req.path
 
-  console.log(req.path)
-
-  const params = { Bucket: SLS_BUCKET_NAME, Key: slash(join(CIRCLE_TAG, s3Path)) }
+  const params = { Bucket: ALUCIO_S3BUCKET_NAME, Key: slash(join(CIRCLE_TAG, s3Path)) }
 
   const contentType = mime.contentType(basename(s3Path))
   if (contentType.split('/')[0] === 'image') {

@@ -9,7 +9,7 @@ orbs:
 
 jobs:
   gatsby_build:
-    working_directory: ~/repo
+    working_directory: /home/circleci/repo
     docker:
       - image: circleci/node:10.15
     steps:
@@ -34,18 +34,37 @@ jobs:
             - public
 
   s3copy:
-    working_directory: ~/repo
+    working_directory: /home/circleci/repo
     executor: aws-cli/default
     steps:
       - aws-cli/install
       - attach_workspace:
-          at: /tmp/public
+          at: /home/circleci/repo
       - run: |
           ls -al
           S3PREFIX=${CIRCLE_TAG:-local}
           echo $S3PREFIX
           aws --version
+          aws s3 rm s3://$ALUCIO_S3BUCKET_NAME/$S3PREFIX --recursive
           aws s3 cp public s3://$ALUCIO_S3BUCKET_NAME/$S3PREFIX --recursive
+
+  sls_deploy:
+    working_directory: /home/circleci/repo
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache: &restore_cache
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: |
+          ls -al
+          npx sls package --package build
+          cp -r build artifacts
+          npx sls deploy --package build
+      - store_artifacts:
+          path: build
+          destination: artifact-file
 
 workflows:
   version: 2
@@ -55,3 +74,6 @@ workflows:
       - s3copy:
           requires:
             - gatsby_build
+      - sls_deploy:
+          requires:
+            - s3copy
