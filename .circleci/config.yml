@@ -2,15 +2,16 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-defaults: &defaults
-  working_directory: ~/repo
-  docker:
-    - image: circleci/node:10.15
+version: 2.1
 
-version: 2
+orbs:
+  awscli: circleci/aws-cli@0.1.13
+
 jobs:
   build_only:
-    <<: *defaults
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:10.15
     steps:
       - checkout
       - restore_cache: &restore_cache
@@ -23,9 +24,19 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+  s3copy:
+    working_directory: ~/repo
+    steps:
+      - awscli/install
+      - run: |
+          S3PREFIX=${CIRCLE_TAG:-local}
+          echo $S3PREFIX
+          aws --version
+          aws s3 cp public s3://$ALUCIO_S3BUCKET_NAME/$S3PREFIX --recursive
 
 workflows:
   version: 2
-  untagged_jobs:
+  build_s3copy:
     jobs:
-      - build_only
+      - build
+      - s3copy
