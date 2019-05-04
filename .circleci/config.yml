@@ -42,6 +42,7 @@ jobs:
           at: /home/circleci/repo
       - run: |
           ls -al
+          echo $AWS_ACCESS_KEY_ID
           S3PREFIX=${CIRCLE_TAG:-local}
           echo $S3PREFIX
           aws --version
