@@ -19,15 +19,15 @@ provider:
   memorySize: 128
   timeout: 2
   environment:
-    SLS_BUCKET_NAME: ${env:SLS_BUCKET_NAME}
+    ALUCIO_S3BUCKET_NAME: ${env:ALUCIO_S3BUCKET_NAME}
     CIRCLE_TAG: ${env:CIRCLE_TAG}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:GetObject
       Resource:
-        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}"
-        - "arn:aws:s3:::${env:SLS_BUCKET_NAME}/*"
+        - "arn:aws:s3:::${env:ALUCIO_S3BUCKET_NAME}"
+        - "arn:aws:s3:::${env:ALUCIO_S3BUCKET_NAME}/*"
 
 functions:
   index:
