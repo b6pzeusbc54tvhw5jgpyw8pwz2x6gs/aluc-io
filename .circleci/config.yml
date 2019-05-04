@@ -20,6 +20,7 @@ jobs:
       - run: &yarn_install_build |
           yarn install
           yarn run build
+          ls -al
       - save_cache: &save_cache
           paths:
             - node_modules
@@ -41,3 +42,5 @@ workflows:
     jobs:
       - gatsby_build
       - s3copy
+          requires:
+            - gatsby_build
