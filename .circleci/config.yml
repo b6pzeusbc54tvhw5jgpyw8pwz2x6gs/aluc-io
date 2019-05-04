@@ -5,7 +5,7 @@
 version: 2.1
 
 orbs:
-  awscli: circleci/aws-cli@0.1.13
+  aws-cli: circleci/aws-cli@0.1.13
 
 jobs:
   build_only:
@@ -26,8 +26,9 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
   s3copy:
     working_directory: ~/repo
+    executor: aws-cli/default
     steps:
-      - awscli/install
+      - aws-cli/install
       - run: |
           S3PREFIX=${CIRCLE_TAG:-local}
           echo $S3PREFIX
